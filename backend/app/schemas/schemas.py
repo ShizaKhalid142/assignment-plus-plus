@@ -113,6 +113,14 @@ class NotificationRead(BaseModel):
     is_read: bool = True
 
 
+class RegisterStudentRequest(BaseModel):
+    id_number: str
+
+
+class AIFeedbackRequest(BaseModel):
+    content: str
+
+
 class SubmissionOut(BaseModel):
     id: int
     assignment_id: int

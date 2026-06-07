@@ -2,9 +2,16 @@ import { FormEvent, useState } from 'react';
 
 import { apiFetch } from '../../lib/api';
 
+type CourseAnalytics = {
+  students: number;
+  assignments: number;
+  submission_count: number;
+  average_grade: number | null;
+};
+
 export default function TeacherAnalytics() {
   const [courseId, setCourseId] = useState(1);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<CourseAnalytics | null>(null);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.database import get_db
-from app.models.domain import Submission
+from app.models.domain import Submission, User
+from app.schemas.schemas import AIDraftGradeRequest, AIFeedbackRequest, HintRequest
 from app.services.grading_engine import grade_submission_with_ai
 from app.services.hint_generator import generate_hint
 
@@ -13,15 +14,15 @@ router = APIRouter(prefix="/ai", tags=["ai"])
 
 
 @router.post("/hints")
-def ai_hints(payload: dict, _: dict = Depends(get_current_user)):
-    question = str(payload.get("question", ""))
-    context = payload.get("student_context")
+def ai_hints(payload: HintRequest, _: User = Depends(get_current_user)):
+    question = payload.question
+    context = payload.student_context
     return generate_hint(question, context)
 
 
 @router.post("/grade-draft")
-def ai_grade_draft(payload: dict, db: Session = Depends(get_db), _: dict = Depends(get_current_user)):
-    submission_id = int(payload.get("submission_id", 0))
+def ai_grade_draft(payload: AIDraftGradeRequest, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    submission_id = payload.submission_id
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
@@ -32,8 +33,8 @@ def ai_grade_draft(payload: dict, db: Session = Depends(get_db), _: dict = Depen
 
 
 @router.post("/feedback")
-def ai_feedback(payload: dict, _: dict = Depends(get_current_user)):
-    content = str(payload.get("content", ""))
+def ai_feedback(payload: AIFeedbackRequest, _: User = Depends(get_current_user)):
+    content = payload.content
     return {
         "feedback": "AI feedback draft generated.",
         "summary": "Work demonstrates progress. Clarify reasoning and add citations where needed.",

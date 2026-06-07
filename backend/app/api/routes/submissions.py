@@ -42,7 +42,13 @@ def get_plagiarism(id: int, db: Session = Depends(get_db), _: User = Depends(get
     row = db.query(Submission).filter(Submission.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Submission not found")
-    report = check_plagiarism(row.content, ["Sample reference text for baseline checking"])
+    references = [
+        submission.content
+        for submission in db.query(Submission)
+        .filter(Submission.assignment_id == row.assignment_id, Submission.id != row.id)
+        .all()
+    ]
+    report = check_plagiarism(row.content, references)
     row.plagiarism_score = float(report.get("similarity_score", 0))
     db.commit()
     return report

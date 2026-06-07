@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_role
 from app.database import get_db
 from app.models.domain import Grade, Submission, User
-from app.schemas.schemas import GradeCreate
+from app.schemas.schemas import AIDraftGradeRequest, GradeCreate
 from app.services.grading_engine import grade_submission_with_ai
 from app.services.platform_services import GradingService
 
@@ -29,8 +29,8 @@ def get_grade(submission_id: int, db: Session = Depends(get_db), _: User = Depen
 
 
 @router.post("/ai")
-def grade_submission_ai(payload: dict, db: Session = Depends(get_db), _: User = Depends(require_role("teacher"))):
-    submission_id = int(payload.get("submission_id", 0))
+def grade_submission_ai(payload: AIDraftGradeRequest, db: Session = Depends(get_db), _: User = Depends(require_role("teacher"))):
+    submission_id = payload.submission_id
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")

@@ -2,9 +2,14 @@ import { FormEvent, useState } from 'react';
 
 import { apiFetch } from '../../lib/api';
 
+type GradeDraft = {
+  total_score?: number;
+  overall_feedback?: string;
+};
+
 export default function TeacherGradingQueue() {
   const [submissionId, setSubmissionId] = useState(1);
-  const [draft, setDraft] = useState<any>(null);
+  const [draft, setDraft] = useState<GradeDraft | null>(null);
   const [score, setScore] = useState(80);
   const [message, setMessage] = useState('');
 

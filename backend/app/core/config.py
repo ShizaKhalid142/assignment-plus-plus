@@ -14,11 +14,17 @@ class Settings:
     plagiarism_api_url: str = os.getenv("PLAGIARISM_API_URL", "")
     plagiarism_api_key: str = os.getenv("PLAGIARISM_API_KEY", "")
     cors_origins: list[str] = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
-    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "assignment-plus-plus-secret")
+    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "")
     jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
     jwt_access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return Settings()
+    settings = Settings()
+    if not settings.jwt_secret_key:
+        if settings.environment == "development":
+            settings.jwt_secret_key = "development-only-secret-change-in-production"
+        else:
+            raise ValueError("JWT_SECRET_KEY must be set outside development")
+    return settings

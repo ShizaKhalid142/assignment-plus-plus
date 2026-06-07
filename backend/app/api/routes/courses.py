@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_role
 from app.database import get_db
 from app.models.domain import Course, Enrollment, Student, User
-from app.schemas.schemas import CourseCreate, CourseUpdate
+from app.schemas.schemas import CourseCreate, CourseUpdate, RegisterStudentRequest
 from app.services.platform_services import AnalyticsService, CourseService, EnrollmentService
 
 router = APIRouter(prefix="/courses", tags=["courses"])
@@ -69,11 +69,11 @@ def enroll_in_course(id: int, db: Session = Depends(get_db), student: User = Dep
 
 
 @router.post("/{id}/register-student")
-def register_student(id: int, payload: dict, db: Session = Depends(get_db), teacher: User = Depends(require_role("teacher"))):
+def register_student(id: int, payload: RegisterStudentRequest, db: Session = Depends(get_db), teacher: User = Depends(require_role("teacher"))):
     course = db.query(Course).filter(Course.id == id, Course.teacher_id == teacher.id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-    id_number = str(payload.get("id_number", "")).strip()
+    id_number = payload.id_number.strip()
     if not id_number:
         raise HTTPException(status_code=400, detail="id_number is required")
 

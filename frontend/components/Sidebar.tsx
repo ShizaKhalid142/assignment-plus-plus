@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import { apiFetch } from '../lib/api';
 import { clearSession } from '../lib/auth';
 
 type NavItem = { href: string; label: string; icon: string };
@@ -50,7 +51,8 @@ export default function Sidebar({ role }: { role: 'student' | 'teacher' }) {
         </nav>
         <button
           className="mt-4 w-full rounded-xl bg-white/10 hover:bg-white/20 px-3 py-2 text-sm"
-          onClick={() => {
+          onClick={async () => {
+            await apiFetch('/auth/logout', { method: 'POST' }).catch(() => undefined);
             clearSession();
             push('/');
           }}

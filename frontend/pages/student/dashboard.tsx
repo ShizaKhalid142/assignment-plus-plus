@@ -22,7 +22,7 @@ export default function StudentDashboard() {
         stats={[
           { label: 'Active Assignments', value: assignments.length },
           { label: 'Upcoming Deadlines', value: assignments.filter((item) => Boolean(item.due_date)).length },
-          { label: 'Pending Feedback', value: Math.max(assignments.length - 1, 0) }
+          { label: 'No Deadline Set', value: assignments.filter((item) => !item.due_date).length }
         ]}
       />
       <div className="grid md:grid-cols-2 gap-4">

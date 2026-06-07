@@ -120,14 +120,14 @@ class AnalyticsService:
             .filter(Assignment.course_id == course_id)
             .all()
         )
-        graded_scores = [s.grade.score for s in submissions if s.grade]
+        graded_scores = [s.grade.score for s in submissions if s.grade and isinstance(s.grade.score, (int, float))]
         return {
             "course_id": course.id,
             "course_name": course.name,
             "students": len(course.enrollments),
             "assignments": len(course.assignments),
             "submission_count": len(submissions),
-            "average_grade": round(sum(graded_scores) / len(graded_scores), 2) if graded_scores else 0,
+            "average_grade": round(sum(graded_scores) / len(graded_scores), 2) if graded_scores else None,
         }
 
 

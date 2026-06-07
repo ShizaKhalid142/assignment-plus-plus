@@ -8,11 +8,17 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.security import hash_password
+from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.models.domain import Assignment, Course, Enrollment, Notification, Rubric, RubricCriteria, Student, Submission, Teacher
 
 
 def seed_sample_data() -> None:
+    settings = get_settings()
+    if settings.environment != "development":
+        print("Skipping seed data because environment is not development.")
+        return
+
     db = SessionLocal()
     try:
         if db.query(Course).count() > 0:

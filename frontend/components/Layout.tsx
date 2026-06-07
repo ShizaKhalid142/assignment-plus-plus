@@ -1,12 +1,14 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 
+import { getRole } from '../lib/auth';
 import Navigation from './Navigation';
 import NotificationBar from './NotificationBar';
 import Sidebar from './Sidebar';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useRouter();
+  const [sessionRole, setSessionRole] = useState<'student' | 'teacher' | null>(null);
 
   const role = useMemo(() => {
     if (pathname.startsWith('/teacher')) return 'teacher';
@@ -14,7 +16,11 @@ export default function Layout({ children }: { children: ReactNode }) {
     return null;
   }, [pathname]);
 
-  if (role) {
+  useEffect(() => {
+    setSessionRole(getRole());
+  }, [pathname]);
+
+  if (role && (!sessionRole || sessionRole === role)) {
     return (
       <div className="min-h-screen bg-navy-100">
         <NotificationBar />
