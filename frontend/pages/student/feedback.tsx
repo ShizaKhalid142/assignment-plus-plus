@@ -1,29 +1,34 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 
-import GradeDisplay from '../../components/GradeDisplay';
+import FeedbackCard from '../../components/FeedbackCard';
+import { apiFetch } from '../../lib/api';
 
-type Submission = { id: number; student_name: string; grade: number | null; feedback: string | null };
+type Grade = { score: number };
+type Feedback = { comments?: string; plagiarism_report?: string | null };
 
 export default function StudentFeedback() {
-  const [items, setItems] = useState<Submission[]>([]);
+  const [submissionId, setSubmissionId] = useState(1);
+  const [grade, setGrade] = useState<Grade | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  useEffect(() => {
-    fetch('http://localhost:8000/api/submissions')
-      .then((r) => r.json())
-      .then(setItems)
-      .catch(() => {});
-  }, []);
+  async function load(event: FormEvent) {
+    event.preventDefault();
+    const [gradeData, feedbackData] = await Promise.all([
+      apiFetch<Grade>(`/grades/${submissionId}`).catch(() => ({ score: 0 })),
+      apiFetch<Feedback>(`/feedback/${submissionId}`).catch(() => ({ comments: 'No feedback yet', plagiarism_report: null }))
+    ]);
+    setGrade(gradeData);
+    setFeedback(feedbackData);
+  }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Feedback & Grades</h1>
-      {items.map((s) => (
-        <div key={s.id} className="card">
-          <p className="font-medium">Submission #{s.id} - {s.student_name}</p>
-          <p>Grade: <GradeDisplay grade={s.grade} /></p>
-          <p className="text-sm text-slate-600 dark:text-slate-300">{s.feedback || 'No feedback yet'}</p>
-        </div>
-      ))}
+      <form className="card max-w-sm space-y-3" onSubmit={load}>
+        <h1 className="text-xl font-semibold text-navy-900">Feedback View</h1>
+        <input className="w-full rounded-xl border px-3 py-2" type="number" min={1} value={submissionId} onChange={(e) => setSubmissionId(Number(e.target.value))} />
+        <button className="btn-primary w-full">Load Feedback</button>
+      </form>
+      <FeedbackCard score={grade?.score} comments={feedback?.comments} plagiarism={feedback?.plagiarism_report} />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function SubmissionForm({ assignmentId = 1 }: { assignmentId?: nu
       <input value={studentName} onChange={(e) => setStudentName(e.target.value)} className="w-full rounded border px-3 py-2 bg-transparent" placeholder="Your name" required />
       <textarea value={content} onChange={(e) => setContent(e.target.value)} className="w-full rounded border px-3 py-2 min-h-32 bg-transparent" placeholder="Paste solution or notes" required />
       <input type="file" className="w-full text-sm" onChange={(e) => setFileName(e.target.files?.[0]?.name || '')} />
-      <button className="rounded bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 transition">Submit</button>
+      <button className="rounded bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 transition">Submit</button>
       {message && <p className="text-sm text-emerald-600">{message}</p>}
     </form>
   );

@@ -1,11 +1,15 @@
-from app.api.routes import assignments, courses, dashboard, grades, hints, plagiarism, submissions
+from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions
 
 __all__ = [
-    "assignments",
+    "auth",
     "courses",
-    "dashboard",
+    "assignments",
+    "submissions",
     "grades",
+    "feedback",
+    "notifications",
+    "ai",
+    "dashboard",
     "hints",
     "plagiarism",
-    "submissions",
 ]
