@@ -16,49 +16,97 @@ submission_service = SubmissionService()
 
 
 @router.post("")
-def create_submission(payload: SubmissionCreate, db: Session = Depends(get_db), student: User = Depends(require_role("student"))):
+def create_submission(
+    payload: SubmissionCreate,
+    db: Session = Depends(get_db),
+    student: User = Depends(require_role("student"))
+):
+    """Create a new submission"""
     row = submission_service.submit(db, student.id, payload.assignment_id, payload.content, payload.file_name)
-    return {"id": row.id, "message": "Submission saved"}
+    return {"id": row.id, "message": "Submission saved successfully"}
 
 
 @router.get("")
-def list_submissions(assignment_id: int | None = None, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_submissions(
+    assignment_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List submissions (filtered by role)"""
     query = db.query(Submission).order_by(Submission.created_at.desc())
+    
+    # Students can only see their own submissions
+    if current_user.role == "student":
+        query = query.filter(Submission.student_id == current_user.id)
+    
     if assignment_id is not None:
         query = query.filter(Submission.assignment_id == assignment_id)
-    return query.all()
+    
+    return [SubmissionOut.model_validate(s, from_attributes=True).model_dump() for s in query.all()]
 
 
 @router.get("/{id}")
-def get_submission(id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_submission(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get a specific submission"""
     row = db.query(Submission).filter(Submission.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Submission not found")
+    
+    # Check permissions: teacher of course or student who submitted
+    if current_user.role == "student" and row.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You cannot access this submission")
+    
     return SubmissionOut.model_validate(row, from_attributes=True).model_dump()
 
 
 @router.get("/{id}/plagiarism")
-def get_plagiarism(id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_plagiarism(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Check plagiarism for a submission"""
     row = db.query(Submission).filter(Submission.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Submission not found")
+    
+    # Only teacher can check plagiarism
+    if current_user.role != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can check plagiarism")
+    
+    # Get reference submissions from same assignment
     references = [
         submission.content
         for submission in db.query(Submission)
         .filter(Submission.assignment_id == row.assignment_id, Submission.id != row.id)
         .all()
     ]
+    
     report = check_plagiarism(row.content, references)
-    row.plagiarism_score = float(report.get("similarity_score", 0))
+    row.plagiarism_score = float(report.get("plagiarism_score", 0))
     db.commit()
     return report
 
 
 @router.post("/{id}/draft-feedback")
-def draft_feedback(id: int, db: Session = Depends(get_db), _: User = Depends(require_role("student"))):
+def draft_feedback(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Generate AI draft feedback for a submission"""
     row = db.query(Submission).filter(Submission.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Submission not found")
+
+    # Students can generate feedback for their own submissions
+    # Teachers can generate for any submission
+    if current_user.role == "student" and row.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only generate feedback for your own submissions")
 
     hint = generate_hint("How can I improve this assignment?", row.content)
     row.draft_feedback = hint.get("hint")
@@ -67,13 +115,23 @@ def draft_feedback(id: int, db: Session = Depends(get_db), _: User = Depends(req
 
 
 @router.put("/{id}")
-def resubmit(id: int, payload: SubmissionUpdate, db: Session = Depends(get_db), _: User = Depends(require_role("student"))):
+def resubmit(
+    id: int,
+    payload: SubmissionUpdate,
+    db: Session = Depends(get_db),
+    student: User = Depends(require_role("student"))
+):
+    """Update/resubmit a submission"""
     row = db.query(Submission).filter(Submission.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Submission not found")
+    
+    # Ensure student can only update their own submissions
+    if row.student_id != student.id:
+        raise HTTPException(status_code=403, detail="You can only update your own submissions")
 
     row.content = payload.content
     row.file_name = payload.file_name
     db.commit()
     db.refresh(row)
-    return {"message": "Submission updated", "id": row.id}
+    return {"message": "Submission updated successfully", "id": row.id}

@@ -3,21 +3,35 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: str
+    user_id: int | None = None
 
 
 class RegisterRequest(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    password: str = Field(min_length=6)
+    password: str = Field(..., min_length=8)
     role: str = Field(pattern="^(student|teacher)$")
     id_number: str | None = None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password has uppercase, lowercase, and digits"""
+        import re
+        if not re.search(r'[A-Z]', v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r'[a-z]', v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r'[0-9]', v):
+            raise ValueError("Password must contain at least one digit")
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -31,7 +45,20 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    password: str = Field(min_length=6)
+    password: str = Field(..., min_length=8)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password has uppercase, lowercase, and digits"""
+        import re
+        if not re.search(r'[A-Z]', v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r'[a-z]', v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r'[0-9]', v):
+            raise ValueError("Password must contain at least one digit")
+        return v
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -41,13 +68,26 @@ class ProfileUpdateRequest(BaseModel):
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
-    new_password: str = Field(min_length=6)
+    new_password: str = Field(..., min_length=8)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password has uppercase, lowercase, and digits"""
+        import re
+        if not re.search(r'[A-Z]', v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r'[a-z]', v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r'[0-9]', v):
+            raise ValueError("Password must contain at least one digit")
+        return v
 
 
 class CourseCreate(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
-    code: str
+    code: str = Field(..., min_length=1, max_length=80)
 
 
 class CourseUpdate(BaseModel):
@@ -57,7 +97,7 @@ class CourseUpdate(BaseModel):
 
 class AssignmentCreate(BaseModel):
     course_id: int
-    title: str
+    title: str = Field(..., min_length=1, max_length=255)
     description: str
     rubric: list[dict[str, Any]] = Field(default_factory=list)
     due_date: str | None = None

@@ -10,7 +10,18 @@ if str(BACKEND_DIR) not in sys.path:
 from app.core.security import hash_password
 from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
-from app.models.domain import Assignment, Course, Enrollment, Notification, Rubric, RubricCriteria, Student, Submission, Teacher
+from app.models.domain import (
+    Assignment,
+    Course,
+    Enrollment,
+    Notification,
+    Rubric,
+    RubricCriteria,
+    Student,
+    Submission,
+    Teacher,
+    PasswordResetToken,
+)
 
 
 def seed_sample_data() -> None:
@@ -24,6 +35,13 @@ def seed_sample_data() -> None:
         if db.query(Course).count() > 0:
             return
 
+        admin = User(
+            name="Admin",
+            email="admin@assignmentpp.com",
+            password_hash=hash_password("Admin123"),
+            role="admin",
+            id_number="A-0001",
+        )
         teacher = Teacher(
             name="Prof. Ada",
             email="teacher@assignmentpp.com",
@@ -38,10 +56,15 @@ def seed_sample_data() -> None:
             role="student",
             id_number="S-1001",
         )
-        db.add_all([teacher, student])
+        db.add_all([admin, teacher, student])
         db.flush()
 
-        course = Course(name="Software Engineering", description="Assignment++ demonstration course", code="SE-2026", teacher_id=teacher.id)
+        course = Course(
+            name="Software Engineering",
+            description="Assignment++ demonstration course",
+            code="SE-2026",
+            teacher_id=teacher.id
+        )
         db.add(course)
         db.flush()
 

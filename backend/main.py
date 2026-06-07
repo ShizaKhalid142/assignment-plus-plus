@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions
+from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions, admin
 from app.core.config import get_settings
 from database.init_db import init_db
 
@@ -44,6 +44,7 @@ def health():
 
 
 app.include_router(auth.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 app.include_router(courses.router, prefix="/api")
 app.include_router(assignments.router, prefix="/api")
 app.include_router(submissions.router, prefix="/api")

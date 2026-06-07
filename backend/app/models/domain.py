@@ -141,6 +141,7 @@ class Grade(Base):
     status: Mapped[str] = mapped_column(String(30), default="draft", nullable=False)
 
     submission: Mapped[Submission] = relationship(back_populates="grade")
+    teacher: Mapped[Teacher] = relationship()
 
 
 class Feedback(Base):
@@ -151,8 +152,13 @@ class Feedback(Base):
     teacher_id: Mapped[int] = mapped_column(ForeignKey("teachers.id"), nullable=False)
     comments: Mapped[str] = mapped_column(Text, default="", nullable=False)
     plagiarism_report: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     submission: Mapped[Submission] = relationship(back_populates="feedback")
+    teacher: Mapped[Teacher] = relationship()
 
 
 class SubmissionPolicy(Base):
@@ -188,3 +194,13 @@ class GradingPolicy(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     feedback_template: Mapped[str] = mapped_column(Text, default="", nullable=False)
     late_penalty_percent: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

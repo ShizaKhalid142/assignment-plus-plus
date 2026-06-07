@@ -1,7 +1,21 @@
 from __future__ import annotations
 
 import os
+import socket
 from functools import lru_cache
+
+
+def _get_default_cors_origins() -> str:
+    """Generate default CORS origins for development"""
+    hostname = socket.gethostname()
+    localhost_ip = socket.gethostbyname(hostname)
+    
+    return ",".join([
+        "http://localhost:3000",
+        f"http://{hostname}:3000",
+        f"http://{localhost_ip}:3000",
+        "http://127.0.0.1:3000",
+    ])
 
 
 class Settings:
@@ -13,7 +27,7 @@ class Settings:
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
     plagiarism_api_url: str = os.getenv("PLAGIARISM_API_URL", "")
     plagiarism_api_key: str = os.getenv("PLAGIARISM_API_KEY", "")
-    cors_origins: list[str] = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
+    cors_origins: list[str] = [o.strip() for o in os.getenv("CORS_ORIGINS", _get_default_cors_origins()).split(",") if o.strip()]
     jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "")
     jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
     jwt_access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
