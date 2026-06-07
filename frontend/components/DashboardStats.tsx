@@ -5,8 +5,8 @@ export default function DashboardStats({ stats }: Props) {
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {stats.map((s) => (
         <div key={s.label} className="card">
-          <p className="text-sm text-slate-500 dark:text-slate-400">{s.label}</p>
-          <p className="text-2xl font-bold text-brand-600 mt-1">{s.value}</p>
+          <p className="text-sm text-slate-500">{s.label}</p>
+          <p className="text-2xl font-bold text-navy-900 mt-1">{s.value}</p>
         </div>
       ))}
     </div>

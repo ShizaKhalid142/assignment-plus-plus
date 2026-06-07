@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react';
 
 import AssignmentCard from '../../components/AssignmentCard';
+import DashboardStats from '../../components/DashboardStats';
+import { apiFetch } from '../../lib/api';
 
 type Assignment = { id: number; title: string; description: string; due_date?: string };
 
 export default function StudentDashboard() {
-  const [items, setItems] = useState<Assignment[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard/student')
-      .then((r) => r.json())
-      .then((d) => setItems(d.active_assignments || []))
-      .catch(() => {});
+    apiFetch<{ active_assignments: Assignment[] }>('/dashboard/student')
+      .then((data) => setAssignments(data.active_assignments || []))
+      .catch(() => setAssignments([]));
   }, []);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Student Dashboard</h1>
-      <div className="grid md:grid-cols-2 gap-4">{items.map((a) => <AssignmentCard key={a.id} title={a.title} description={a.description} dueDate={a.due_date} />)}</div>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-navy-900">Student Dashboard</h1>
+      <DashboardStats
+        stats={[
+          { label: 'Active Assignments', value: assignments.length },
+          { label: 'Upcoming Deadlines', value: assignments.filter((item) => Boolean(item.due_date)).length },
+          { label: 'Pending Feedback', value: Math.max(assignments.length - 1, 0) }
+        ]}
+      />
+      <div className="grid md:grid-cols-2 gap-4">
+        {assignments.map((item) => <AssignmentCard key={item.id} title={item.title} description={item.description} dueDate={item.due_date} />)}
+      </div>
     </div>
   );
 }

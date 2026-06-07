@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import assignments, courses, dashboard, grades, hints, plagiarism, submissions
+from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions
 from app.core.config import get_settings
 from database.init_db import init_db
 
@@ -29,27 +29,32 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     init_db()
-    logger.info("Application started and database initialized")
+    logger.info("Database initialized")
 
 
 @app.exception_handler(Exception)
 async def global_exception_handler(_: Request, exc: Exception):
     logger.exception("Unhandled error: %s", exc)
-    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "service": settings.app_name}
 
 
+app.include_router(auth.router, prefix="/api")
 app.include_router(courses.router, prefix="/api")
 app.include_router(assignments.router, prefix="/api")
 app.include_router(submissions.router, prefix="/api")
 app.include_router(grades.router, prefix="/api")
+app.include_router(feedback.router, prefix="/api")
+app.include_router(notifications.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 app.include_router(plagiarism.router, prefix="/api")
 app.include_router(hints.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
