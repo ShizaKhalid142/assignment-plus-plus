@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -39,6 +39,6 @@ class Submission(Base):
     file_name: Mapped[str] = mapped_column(String(255), nullable=True)
     grade: Mapped[float | None] = mapped_column(Float, nullable=True)
     feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     assignment: Mapped[Assignment] = relationship(back_populates="submissions")

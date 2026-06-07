@@ -1,8 +1,16 @@
 import { useState } from 'react';
 
+type GradingResult = {
+  total_score: number;
+  max_score: number;
+  overall_feedback: string;
+  model: string;
+  criteria?: Array<{ criterion: string; score: number; max_points: number; feedback: string }>;
+};
+
 export default function TeacherGrading() {
   const [submissionId, setSubmissionId] = useState(1);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<GradingResult | null>(null);
 
   async function runGrading() {
     const res = await fetch('http://localhost:8000/api/grades/ai', {

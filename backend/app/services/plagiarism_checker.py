@@ -47,16 +47,20 @@ def check_plagiarism(submission_text: str, reference_texts: list[str]) -> dict:
     external_result = None
     if settings.plagiarism_api_url:
         try:
+            headers = {}
+            if settings.plagiarism_api_key:
+                headers["X-API-Key"] = settings.plagiarism_api_key
             response = requests.post(
                 settings.plagiarism_api_url,
                 json={"text": submission_text},
-                headers={"Authorization": f"******"},
+                headers=headers,
                 timeout=8,
             )
             response.raise_for_status()
             external_result = response.json()
         except Exception as exc:  # noqa: BLE001
-            external_result = {"warning": f"External plagiarism API unavailable: {exc}"}
+            _ = exc
+            external_result = {"warning": "External plagiarism API unavailable."}
 
     highest = max([c["combined_similarity"] for c in checks], default=0.0)
     external_score = float(external_result.get("similarity", 0)) if isinstance(external_result, dict) else 0.0
