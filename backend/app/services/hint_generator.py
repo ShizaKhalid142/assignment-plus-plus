@@ -2,7 +2,7 @@ from __future__ import annotations
 
 try:
     import google.generativeai as genai
-except Exception:  # noqa: BLE001
+except ImportError:
     genai = None
 
 from app.core.config import get_settings

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from difflib import SequenceMatcher
 
@@ -8,6 +9,7 @@ import requests
 from app.core.config import get_settings
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 def _normalize(text: str) -> str:
@@ -59,7 +61,7 @@ def check_plagiarism(submission_text: str, reference_texts: list[str]) -> dict:
             response.raise_for_status()
             external_result = response.json()
         except Exception as exc:  # noqa: BLE001
-            _ = exc
+            logger.warning("External plagiarism API unavailable: %s", type(exc).__name__)
             external_result = {"warning": "External plagiarism API unavailable."}
 
     highest = max([c["combined_similarity"] for c in checks], default=0.0)

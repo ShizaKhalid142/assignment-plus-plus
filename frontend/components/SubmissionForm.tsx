@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 
 export default function SubmissionForm({ assignmentId = 1 }: { assignmentId?: number }) {
-  const [studentName, setStudentName] = useState('Ali Student');
+  const [studentName, setStudentName] = useState('');
   const [content, setContent] = useState('');
   const [fileName, setFileName] = useState('');
   const [message, setMessage] = useState('');
@@ -20,7 +20,7 @@ export default function SubmissionForm({ assignmentId = 1 }: { assignmentId?: nu
   return (
     <form onSubmit={onSubmit} className="card space-y-3">
       <h3 className="font-semibold">Submit Assignment</h3>
-      <input value={studentName} onChange={(e) => setStudentName(e.target.value)} className="w-full rounded border px-3 py-2 bg-transparent" placeholder="Your name" />
+      <input value={studentName} onChange={(e) => setStudentName(e.target.value)} className="w-full rounded border px-3 py-2 bg-transparent" placeholder="Your name" required />
       <textarea value={content} onChange={(e) => setContent(e.target.value)} className="w-full rounded border px-3 py-2 min-h-32 bg-transparent" placeholder="Paste solution or notes" required />
       <input type="file" className="w-full text-sm" onChange={(e) => setFileName(e.target.files?.[0]?.name || '')} />
       <button className="rounded bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 transition">Submit</button>
