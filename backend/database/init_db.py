@@ -11,6 +11,7 @@ from app.core.security import hash_password
 from app.core.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.models.domain import (
+    Admin,
     Assignment,
     Course,
     Enrollment,
@@ -35,7 +36,7 @@ def seed_sample_data() -> None:
         if db.query(Course).count() > 0:
             return
 
-        admin = User(
+        admin = Admin(
             name="Admin",
             email="admin@assignmentpp.com",
             password_hash=hash_password("Admin123"),

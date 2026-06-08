@@ -44,7 +44,7 @@ A full-stack platform that streamlines the assignment lifecycle — from creatio
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Python 3.11, FastAPI, Uvicorn |
+| **Backend** | Python 3.12, FastAPI, Uvicorn |
 | **Database** | SQLite (dev), SQLAlchemy 2.0 ORM |
 | **Auth** | JWT (python-jose) + Argon2 (passlib) |
 | **AI Grading** | OpenAI GPT-4o-mini (+ heuristic fallback) |
@@ -59,15 +59,17 @@ A full-stack platform that streamlines the assignment lifecycle — from creatio
 ## Quick Start
 
 ### Prerequisites
-- Python 3.10+ and Node.js 18+
+- **uv** (recommended Python package manager) — [install uv](https://docs.astral.sh/uv/getting-started/installation/)
+- **Node.js 20+** with **npm** (frontend only) — use [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm) for per-project version isolation (detects `frontend/.node-version`)
 - (Optional) Docker for containerized setup
 
-### 1. Backend Setup
+### 1. Backend Setup (uv)
 
 ```bash
-pip install -r backend/requirements.txt
+# uv auto-installs Python 3.12 and creates the virtual environment
+uv sync
 cp backend/.env.example backend/.env
-python backend/main.py
+uv run python backend/main.py
 ```
 
 Backend starts at **http://localhost:8000** — API docs at **http://localhost:8000/docs**
@@ -80,6 +82,8 @@ npm --prefix frontend run dev
 ```
 
 Frontend starts at **http://localhost:3000**
+
+Node dependencies are installed into `frontend/node_modules/` — already isolated per-project (no extra tooling needed). To auto-switch Node versions, place a `.node-version` file (e.g., `20`) and use `fnm` or `nvm`.
 
 ### 3. Docker (Alternative)
 
@@ -100,7 +104,7 @@ From another device on your network, replace `localhost` with your computer's IP
 ```
 ┌─ Frontend (Next.js / React 18) ─────────────────────────────────┐
 │  apiFetch() ──► /api/* ──► FastAPI ──► Services ──► SQLAlchemy  │
-│  lib/session.ts (localStorage JWT)           │                  │
+│  lib/auth.ts (localStorage JWT)              │                  │
 │  Layout → Sidebar or Navigation              ▼                  │
 └─────────────────────────────────  SQLite / PostgreSQL (planned) ─┘
 ```
@@ -108,7 +112,7 @@ From another device on your network, replace `localhost` with your computer's IP
 ### Backend Layers
 - **Routes** (`backend/app/api/routes/`) — 12 route modules, each an `APIRouter` with domain-specific prefix
 - **Services** (`backend/app/services/`) — business logic, AI grading engine, plagiarism checker, hint generator
-- **Models** (`backend/app/models/domain.py`) — 13 SQLAlchemy models with polymorphic User inheritance
+- **Models** (`backend/app/models/domain.py`) — 14 SQLAlchemy models with polymorphic User inheritance
 - **Schemas** (`backend/app/schemas/schemas.py`) — Pydantic v2 request/response validation
 - **Auth** (`backend/app/api/deps.py`) — dependency injection for `get_current_user` and `require_role()`
 
@@ -116,7 +120,7 @@ From another device on your network, replace `localhost` with your computer's IP
 - `pages/_app.tsx` wraps all pages in `<Layout>`
 - `Layout.tsx` auto-detects role from pathname (`/teacher/*`, `/student/*`) and renders `Sidebar` + `NotificationBar`
 - All API calls go through `lib/api.ts`'s `apiFetch<T>()` — token auto-attached from localStorage
-- Auth state managed via `lib/session.ts`
+- Auth state managed via `lib/auth.ts`
 
 ---
 
@@ -157,12 +161,13 @@ All endpoints prefixed with `/api`. Full interactive docs at `http://localhost:8
 ## Project Structure
 
 ```
-backend/
-  main.py                         FastAPI app entry, CORS, router mounting, /health
-  run.py                          Uvicorn runner
-  requirements.txt                Python dependencies
-  .env.example                    Environment template
-  database/init_db.py             DB creation + demo data seeding
+assignment-plus-plus/
+  pyproject.toml                   uv project config + dependencies
+  backend/
+    main.py                         FastAPI app entry, CORS, router mounting, /health
+    run.py                          Uvicorn runner
+    .env.example                    Environment template
+    database/init_db.py             DB creation + demo data seeding
   app/
     database.py                   Engine + get_db dependency
     api/
@@ -181,11 +186,12 @@ backend/
       platform_services.py        Course, Assignment, Submission, Grade, etc. services
 
 frontend/
+  .node-version                   Node.js version pin (fnm/nvm compatible)
   .env.local                      Client-side API base URL
   styles/globals.css              Tailwind base + shared utility classes
   lib/
     api.ts                        Centralized fetch wrapper + typed API modules
-    session.ts                    localStorage-based auth state management
+    auth.ts                       localStorage-based auth state management
   components/
     Layout.tsx                    Adaptive layout (Sidebar for roles, Navigation for public)
     Navigation.tsx                Sticky navbar with auth-aware links
@@ -240,24 +246,29 @@ All AI services degrade gracefully when API keys are missing — no crashes, no 
 ## Running Commands
 
 ```bash
-# Backend
-pip install -r backend/requirements.txt     # Install Python deps
-cp backend/.env.example backend/.env         # Create env file
-python backend/main.py                       # Start backend (:8000)
-python backend/run.py                        # Start backend (alt with auto-reload)
+# Backend (uv — recommended)
+uv sync                                        # Install all Python deps + create .venv
+uv run python backend/main.py                  # Start backend (:8000)
+uv run python backend/run.py                   # Start backend (alt with auto-reload)
+
+# Backend (pip — alternative)
+pip install -r backend/requirements.txt        # Install Python deps
+pip install argon2-cffi                         # Required for passlib/Argon2
+cp backend/.env.example backend/.env            # Create env file
+python backend/main.py                          # Start backend (:8000)
 
 # Frontend
-npm --prefix frontend install                # Install Node deps
-npm --prefix frontend run dev                # Start dev server (:3000)
-npm --prefix frontend run build              # Production build
-npm --prefix frontend run lint               # Lint check
+npm --prefix frontend install                   # Install Node deps
+npm --prefix frontend run dev                   # Start dev server (:3000)
+npm --prefix frontend run build                 # Production build
+npm --prefix frontend run lint                  # Lint check
 
 # Docker
-docker-compose up                            # Start both services
-docker-compose down                          # Stop both services
+docker-compose up                               # Start both services
+docker-compose down                             # Stop both services
 
 # Troubleshooting
-rm assignment_plus_plus.db                   # Reset database (re-seeds on restart)
+rm assignment_plus_plus.db                      # Reset database (re-seeds on restart)
 ```
 
 ---

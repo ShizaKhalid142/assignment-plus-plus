@@ -11,23 +11,28 @@ Full-stack **AI-assisted assignment management & grading platform**. Backend: **
 ```
 ┌─ Frontend (Next.js / React 18) ─────────────────────────────────┐
 │  apiFetch() ──► /api/* ──► FastAPI ──► Services ──► SQLAlchemy  │
-│  lib/session.ts (localStorage JWT)           │                  │
+│  lib/auth.ts (localStorage JWT)              │                  │
 │  Layout → Sidebar or Navigation              ▼                  │
 └─────────────────────────────────  SQLite / PostgreSQL (planned) ─┘
 ```
 
 - **Backend**: layered — `routes` (API) → `services` (business logic) → `models` (SQLAlchemy), with Pydantic `schemas` for validation and `deps.py` for auth dependency injection.
-- **Frontend**: Pages Router (not App Router), Tailwind with custom navy palette (`navy-900: #001F54` … `navy-100: #e8f1ff`). `Layout` auto-detects role from pathname and renders `Sidebar` (teacher/student) or `Navigation` (public).
+- **Frontend**: Pages Router (not App Router), Tailwind with custom navy palette (`navy-50` to `navy-900` from `#f0f5ff` to `#001F54`). `Layout` auto-detects role from pathname and renders `Sidebar` (teacher/student) or `Navigation` (public).
 
 ---
 
 ## Common Commands
 
 ```bash
-# Backend
+# Backend (uv)
+uv sync                                     # install Python deps + create .venv
+uv run python backend/main.py               # starts on :8000
+
+# Backend (pip — alternative)
 pip install -r backend/requirements.txt
+pip install argon2-cffi                      # required for passlib Argon2
 cp backend/.env.example backend/.env
-python backend/main.py                  # starts on :8000
+python backend/main.py                       # starts on :8000
 
 # Frontend
 npm --prefix frontend install
@@ -46,8 +51,9 @@ docker-compose up                       # both services
 ## Directory Structure
 
 ```
+pyproject.toml              # uv project config + dependencies
 backend/
-  main.py                   # FastAPI app, CORS, router mounting, /health
+  main.py                   # FastAPI app, lifespan, CORS, router mounting, /health
   run.py                    # Uvicorn runner (alt entry point)
   database/init_db.py       # create_all + seed demo data
   app/
@@ -58,7 +64,7 @@ backend/
     core/
       config.py             # Settings dataclass (env vars) + get_settings()
       security.py           # Argon2 hashing + JWT create/decode
-    models/domain.py        # 13 SQLAlchemy models (polymorphic User base)
+    models/domain.py        # 14 SQLAlchemy models (polymorphic User base)
     schemas/schemas.py      # Pydantic request/response models
     services/
       platform_services.py  # CourseService, AssignmentService, SubmissionService, etc.
@@ -67,10 +73,11 @@ backend/
       plagiarism_checker.py # difflib + conceptual overlap detection
 
 frontend/
+  .node-version             # Node.js version pin (20)
   .env.local                # NEXT_PUBLIC_API_BASE_URL (overrides default)
   lib/
     api.ts                  # apiFetch<T>() + typed API modules (authApi, coursesApi, …)
-    session.ts              # localStorage auth (setAuth, getToken, getUser, getRole, …)
+    auth.ts                 # localStorage auth (setAuth, saveSession, getToken, getUser, getRole, …)
   components/               # Layout, Navigation, Sidebar, Cards, Forms, Spinner, etc.
   pages/
     index.tsx               # Landing page
@@ -90,7 +97,7 @@ frontend/
 - **Routes**: each domain has an `APIRouter(prefix="/...")` in `routes/`, mounted in `main.py` under `/api`.
 - **Auth**: inject via `Depends(get_current_user)` or `Depends(require_role("teacher"))`. Token decoding done in `deps.py`.
 - **Services**: instantiated at module level (`auth_service = AuthenticationService()`), methods take `db: Session` as first arg, raise `HTTPException` for errors.
-- **Models** use SQLAlchemy 2.0 `Mapped`/`mapped_column` style with polymorphic User inheritance (`User → Student, Teacher`). Timestamps use `datetime.now(timezone.utc)`.
+- **Models** use SQLAlchemy 2.0 `Mapped`/`mapped_column` style with polymorphic User inheritance (`User → Student, Teacher, Admin`). Timestamps use `datetime.now(timezone.utc)`.
 - **Schemas** use Pydantic v2 with `field_validator` for password strength (uppercase + lowercase + digit required, min 8 chars).
 - **Naming**: `snake_case` throughout. Tables plural (`users`, `courses`, `submissions`).
 
@@ -99,7 +106,7 @@ frontend/
 ## Frontend Conventions
 
 - **API calls**: all go through `lib/api.ts`'s `apiFetch<T>(path, options)`. Token is auto-attached from localStorage key `assignmentpp_token`. Each API domain has a named export (`authApi`, `coursesApi`, `assignmentsApi`, `submissionsApi`, `gradesApi`, `feedbackApi`, `notificationsApi`, `aiApi`, `dashboardApi`). **Add new endpoints here**, not inline fetch calls.
-- **Auth state**: via `lib/session.ts` — stores `assignmentpp_token`, `assignmentpp_user`, `assignmentpp_role` in localStorage.
+- **Auth state**: via `lib/auth.ts` — stores `assignmentpp_token`, `assignmentpp_user`, `assignmentpp_role` in localStorage. Exports: `setAuth`, `saveSession`, `getToken`, `getUser`, `getRole`, `isAuthenticated`, `clearAuth` (also aliased as `clearSession`).
 - **Layout**: `pages/_app.tsx` wraps everything in `<Layout>`. Layout auto-detects role from pathname (`/teacher/*`, `/student/*`) and renders `Sidebar` + `NotificationBar`; otherwise renders `Navigation`.
 - **Pages**: default-export the page component. Each page file lives in `pages/<role>/<name>.tsx`. Use `useState` + `useEffect` for data fetching (no data-fetching library).
 - **Styling**: Tailwind utility classes only. Custom navy palette in `tailwind.config.js`. No CSS modules or styled-components.
@@ -111,7 +118,7 @@ frontend/
 ## Database
 
 - **Engine**: SQLite (`assignment_plus_plus.db`) with `check_same_thread=False`; PostgreSQL planned.
-- **Models** (13 tables): `users` (polymorphic base), `students`, `teachers`, `courses`, `enrollments`, `assignments`, `rubrics`, `rubric_criteria`, `submissions`, `grades`, `feedback`, `submission_policies`, `grading_policies`, `notifications`, `password_reset_tokens`.
+- **Models** (14 tables): `users` (polymorphic base), `students`, `teachers`, `admins`, `courses`, `enrollments`, `assignments`, `rubrics`, `rubric_criteria`, `submissions`, `grades`, `feedback`, `submission_policies`, `grading_policies`, `notifications`, `password_reset_tokens`.
 - **Seeding**: `database/init_db.py` runs on startup, creates demo data if DB is empty.
 - **No migrations yet** — Alembic planned. Currently `create_all()` on startup.
 
@@ -172,9 +179,10 @@ All services tolerate missing API keys and degrade gracefully.
 | Route registry | `backend/app/api/routes/__init__.py` |
 | Seed data | `backend/database/init_db.py` |
 | Frontend API lib | `frontend/lib/api.ts` |
-| Frontend session | `frontend/lib/session.ts` (imported as `../lib/auth` in some files) |
+| Frontend session | `frontend/lib/auth.ts` |
 | Layout logic | `frontend/components/Layout.tsx` |
 | Tailwind theme | `frontend/tailwind.config.js` |
+| Node version | `frontend/.node-version` |
 | Docker orchestration | `docker-compose.yml` |
 
 ---
@@ -183,5 +191,5 @@ All services tolerate missing API keys and degrade gracefully.
 
 - **Add a new API endpoint**: create/update route in `backend/app/api/routes/`, add Pydantic schema if needed, call service method, register router in `main.py`, and add the typed wrapper to `frontend/lib/api.ts`.
 - **Add a new page**: create `pages/<role>/<name>.tsx`, default-export the component, use `apiFetch`/API module functions for data, Tailwind for styling. Layout/role routing is automatic.
-- **Auth check in pages**: use `lib/session.ts` functions (`isAuthenticated`, `getRole`, etc.) client-side; use `Deps(get_current_user)` server-side.
+- **Auth check in pages**: use `lib/auth.ts` functions (`isAuthenticated`, `getRole`, etc.) client-side; use `Deps(get_current_user)` server-side.
 - **No `.github/`, no test framework, no lint/format config** — don't expect these to exist; add them if needed but follow Python/TS community standards.

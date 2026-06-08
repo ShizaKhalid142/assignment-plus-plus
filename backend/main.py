@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+from pathlib import Path
+
+load_dotenv(Path(__file__).parent / ".env")
 
 from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions, admin
 from app.core.config import get_settings
@@ -15,7 +21,15 @@ settings = get_settings()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("assignment-plus-plus")
 
-app = FastAPI(title=settings.app_name)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    logger.info("Database initialized")
+    yield
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,12 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def startup_event():
-    init_db()
-    logger.info("Database initialized")
 
 
 @app.exception_handler(Exception)
