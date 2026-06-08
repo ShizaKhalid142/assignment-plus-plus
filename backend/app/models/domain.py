@@ -47,6 +47,14 @@ class Teacher(User):
     __mapper_args__ = {"polymorphic_identity": "teacher"}
 
 
+class Admin(User):
+    __tablename__ = "admins"
+
+    id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": "admin"}
+
+
 class Course(Base):
     __tablename__ = "courses"
 
