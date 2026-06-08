@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
-import { apiFetch } from '@/lib/api';
-import { getRole, isAuthenticated } from '@/lib/auth';
+import Layout from '../../components/Layout';
+import { apiFetch } from '../../lib/api';
+import { getRole, isAuthenticated } from '../../lib/auth';
 
 export default function AdminDashboard() {
   const router = useRouter();

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
-import { apiFetch } from '@/lib/api';
-import { isAuthenticated, getRole } from '@/lib/auth';
+import Layout from '../../components/Layout';
+import { apiFetch } from '../../lib/api';
+import { isAuthenticated, getRole } from '../../lib/auth';
 
 export default function TeacherDashboard() {
   const router = useRouter();

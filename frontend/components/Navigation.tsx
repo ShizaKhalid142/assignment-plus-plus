@@ -11,7 +11,7 @@ const links = [
 export default function Navigation() {
   const { pathname, push } = useRouter();
   const [authenticated, setAuthenticated] = useState(false);
-  const [role, setRole] = useState<'student' | 'teacher' | null>(null);
+  const [role, setRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

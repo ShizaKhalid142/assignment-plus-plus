@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
-import { apiFetch } from '@/lib/api';
+import Layout from '../../components/Layout';
+import { apiFetch } from '../../lib/api';
 
 export default function StudentSettings() {
   const router = useRouter();

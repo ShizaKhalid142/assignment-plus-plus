@@ -54,6 +54,49 @@ export async function apiFetch<T = any>(
 }
 
 /**
+ * Session management functions
+ */
+export function saveSession(token: string, role: 'student' | 'teacher' | 'admin', userId?: number) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('assignmentpp_token', token);
+    localStorage.setItem('assignmentpp_role', role);
+    if (userId) localStorage.setItem('assignmentpp_userId', userId.toString());
+  }
+}
+
+export function clearSession() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('assignmentpp_token');
+    localStorage.removeItem('assignmentpp_role');
+    localStorage.removeItem('assignmentpp_userId');
+  }
+}
+
+export function getSession() {
+  if (typeof window === 'undefined') return null;
+  const token = localStorage.getItem('assignmentpp_token');
+  const role = localStorage.getItem('assignmentpp_role') as 'student' | 'teacher' | 'admin' | null;
+  const userId = localStorage.getItem('assignmentpp_userId');
+  return token ? { token, role, userId: userId ? parseInt(userId) : undefined } : null;
+}
+
+export function getRole(): 'student' | 'teacher' | 'admin' | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('assignmentpp_role') as 'student' | 'teacher' | 'admin' | null;
+}
+
+export function getUserId(): number | null {
+  if (typeof window === 'undefined') return null;
+  const userId = localStorage.getItem('assignmentpp_userId');
+  return userId ? parseInt(userId) : null;
+}
+
+export function isAuthenticated(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!localStorage.getItem('assignmentpp_token');
+}
+
+/**
  * Authentication API calls
  */
 export const authApi = {

@@ -20,12 +20,11 @@ export default function SignupPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher'; user_id?: number }>(
+      const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher' | 'admin'; user_id?: number }>(
         '/auth/register',
         {
           method: 'POST',
           body: JSON.stringify({ name, email, password, role, id_number: idNumber || null }),
-          skipAuth: true
         }
       );
       saveSession(data.access_token, data.role, data.user_id);

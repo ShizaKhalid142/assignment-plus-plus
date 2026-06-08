@@ -28,14 +28,21 @@ const teacherItems: NavItem[] = [
   { href: '/teacher/settings', label: 'Settings', icon: '⚙️' }
 ];
 
-export default function Sidebar({ role }: { role: 'student' | 'teacher' }) {
+const adminItems: NavItem[] = [
+  { href: '/admin/dashboard', label: 'Dashboard', icon: '👑' },
+  { href: '/admin/dashboard', label: 'Platform Stats', icon: '📊' },
+  { href: '/admin/dashboard', label: 'Users', icon: '👥' },
+  { href: '/admin/dashboard', label: 'Courses', icon: '📚' },
+];
+
+export default function Sidebar({ role }: { role: 'student' | 'teacher' | 'admin' | null }) {
   const { pathname, push } = useRouter();
-  const items = role === 'teacher' ? teacherItems : studentItems;
+  const items = role === 'admin' ? adminItems : role === 'teacher' ? teacherItems : studentItems;
 
   return (
     <aside className="w-full md:w-72 shrink-0">
       <div className="card bg-navy-900 text-white border-navy-800">
-        <h2 className="text-xl font-semibold">{role === 'teacher' ? 'Teacher Portal' : 'Student Portal'}</h2>
+        <h2 className="text-xl font-semibold">{role === 'admin' ? 'Admin Panel' : role === 'teacher' ? 'Teacher Portal' : 'Student Portal'}</h2>
         <p className="text-sm text-white/70 mt-1">Assignment++ Navigation</p>
         <nav className="mt-4 space-y-2">
           {items.map((item) => (

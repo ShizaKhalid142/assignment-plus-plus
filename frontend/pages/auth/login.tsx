@@ -17,12 +17,11 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher'; user_id?: number }>(
+      const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher' | 'admin'; user_id?: number }>(
         '/auth/login',
         {
           method: 'POST',
           body: JSON.stringify({ email, password }),
-          skipAuth: true
         }
       );
       saveSession(data.access_token, data.role, data.user_id);

@@ -8,9 +8,10 @@ import Sidebar from './Sidebar';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useRouter();
-  const [sessionRole, setSessionRole] = useState<'student' | 'teacher' | null>(null);
+  const [sessionRole, setSessionRole] = useState<'student' | 'teacher' | 'admin' | null>(null);
 
   const role = useMemo(() => {
+    if (pathname.startsWith('/admin')) return 'admin';
     if (pathname.startsWith('/teacher')) return 'teacher';
     if (pathname.startsWith('/student')) return 'student';
     return null;
