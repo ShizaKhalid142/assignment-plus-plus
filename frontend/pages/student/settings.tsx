@@ -21,7 +21,7 @@ export default function StudentSettings() {
     setError('');
     setMessage('');
     try {
-      await apiFetch('/auth/profile', {
+      await apiFetch('/api/auth/profile', {
         method: 'PUT',
         body: JSON.stringify({ name: profile.name, email: profile.email }),
       });
@@ -55,7 +55,7 @@ export default function StudentSettings() {
     setError('');
     setMessage('');
     try {
-      await apiFetch('/auth/change-password', {
+      await apiFetch('/api/auth/change-password', {
         method: 'PUT',
         body: JSON.stringify({ current_password: password.old, new_password: password.new }),
       });

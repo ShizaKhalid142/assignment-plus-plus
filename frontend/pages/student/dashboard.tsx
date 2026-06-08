@@ -17,16 +17,17 @@ export default function StudentDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const upcomingAssignments = assignments.filter((a) => a.due_date && new Date(a.due_date) > new Date()).sort((a, b) => new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime());
+  const upcomingAssignments = assignments
+    .filter((assignment) => assignment.due_date && new Date(assignment.due_date) > new Date())
+    .sort((a, b) => new Date(a.due_date || '').getTime() - new Date(b.due_date || '').getTime());
 
-  if (loading) return <Layout><div className="text-center p-6">⏳ Loading dashboard...</div></Layout>;
+  if (loading) return <Layout><div className="text-center p-6">⏳ Loading student dashboard...</div></Layout>;
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6">
-        <h1 className="text-4xl font-bold text-navy-900 mb-8">📊 Student Dashboard</h1>
+      <div className="max-w-6xl mx-auto p-6 text-white">
+        <h1 className="text-4xl font-bold text-white mb-8">📊 Student Dashboard</h1>
 
-        {/* Stats */}
         <DashboardStats
           stats={[
             { label: '📋 Active Assignments', value: assignments.length },
@@ -35,29 +36,47 @@ export default function StudentDashboard() {
           ]}
         />
 
-        {/* Upcoming Assignments */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-navy-900 mb-6 flex items-center">⏰ Upcoming Deadlines</h2>
-          
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <Link href="/student/assignments">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center shadow-[0_20px_60px_rgba(255,255,255,0.05)] transition hover:border-white/20 hover:bg-white/10">
+              <p className="text-4xl mb-3">📋</p>
+              <p className="font-semibold text-white">View Assignments</p>
+            </div>
+          </Link>
+          <Link href="/student/submit">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center shadow-[0_20px_60px_rgba(255,255,255,0.05)] transition hover:border-white/20 hover:bg-white/10">
+              <p className="text-4xl mb-3">📤</p>
+              <p className="font-semibold text-white">Submit Work</p>
+            </div>
+          </Link>
+          <Link href="/student/feedback">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center shadow-[0_20px_60px_rgba(255,255,255,0.05)] transition hover:border-white/20 hover:bg-white/10">
+              <p className="text-4xl mb-3">✅</p>
+              <p className="font-semibold text-white">Review Feedback</p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold text-white mb-6">Upcoming Deadlines</h2>
           {upcomingAssignments.length === 0 ? (
-            <div className="bg-green-50 rounded-2xl border border-green-200 p-8 text-center">
-              <p className="text-green-700 font-semibold">✓ No upcoming deadlines! Great job!</p>
+            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-8 text-center text-emerald-100">
+              ✓ No upcoming deadlines. Keep up the good work.
             </div>
           ) : (
-            <div className="space-y-3">
-              {upcomingAssignments.slice(0, 5).map((a) => {
-                const daysUntilDue = Math.ceil((new Date(a.due_date || '').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                const isUrgent = daysUntilDue <= 3;
-
+            <div className="space-y-4">
+              {upcomingAssignments.slice(0, 5).map((assignment) => {
+                const daysUntilDue = Math.ceil((new Date(assignment.due_date || '').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                const urgent = daysUntilDue <= 3;
                 return (
-                  <Link key={a.id} href={`/student/submit`}>
-                    <div className={`p-4 rounded-xl border-2 cursor-pointer transition ${isUrgent ? 'bg-red-50 border-red-300' : 'bg-white border-navy-200 hover:border-navy-400'}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-navy-900">📝 {a.title}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{a.description}</p>
+                  <Link key={assignment.id} href="/student/submit">
+                    <div className={`rounded-3xl border p-5 transition ${urgent ? 'border-red-400 bg-red-500/10 text-red-100' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-white">📝 {assignment.title}</h3>
+                          <p className="text-sm text-white/65 mt-2">{assignment.description}</p>
                         </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${isUrgent ? 'bg-red-200 text-red-700' : 'bg-navy-100 text-navy-700'}`}>
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${urgent ? 'bg-red-400/15 text-red-100' : 'bg-white/10 text-white/80'}`}>
                           {daysUntilDue === 0 ? 'TODAY' : `${daysUntilDue}d left`}
                         </span>
                       </div>
@@ -69,26 +88,15 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
-          <Link href="/student/assignments">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6 text-center hover:shadow-md transition cursor-pointer">
-              <p className="text-3xl mb-2">📋</p>
-              <p className="font-semibold text-blue-900">View All Assignments</p>
-            </div>
-          </Link>
-          <Link href="/student/feedback">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200 p-6 text-center hover:shadow-md transition cursor-pointer">
-              <p className="text-3xl mb-2">📊</p>
-              <p className="font-semibold text-green-900">Check Grades</p>
-            </div>
-          </Link>
-          <Link href="/student/courses">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200 p-6 text-center hover:shadow-md transition cursor-pointer">
-              <p className="text-3xl mb-2">🎓</p>
-              <p className="font-semibold text-purple-900">My Courses</p>
-            </div>
-          </Link>
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(255,255,255,0.04)]">
+            <h2 className="text-xl font-semibold text-white">Assignment Detail</h2>
+            <p className="mt-3 text-sm text-white/70">Open any assignment to review its brief, rubric, allowed resources, and hint guidance.</p>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(255,255,255,0.04)]">
+            <h2 className="text-xl font-semibold text-white">Submission History</h2>
+            <p className="mt-3 text-sm text-white/70">Track past submissions and see feedback trends across your courses.</p>
+          </div>
         </div>
       </div>
     </Layout>

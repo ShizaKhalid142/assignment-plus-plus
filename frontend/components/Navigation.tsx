@@ -4,9 +4,20 @@ import { useEffect, useState } from 'react';
 import { getRole, isAuthenticated, clearSession } from '../lib/auth';
 import { apiFetch } from '../lib/api';
 
-const links = [
-  { href: '/', label: 'Home' },
+const navLinks = [
+  { href: '/#features', label: 'Features' },
+  { href: '/#teacher-flow', label: 'Teacher Flow' },
+  { href: '/#student-flow', label: 'Student Flow' },
+  { href: '/#architecture', label: 'Architecture' },
+  { href: '/#stack', label: 'Tech Stack' },
 ];
+
+function dashboardLinkForRole(role: 'student' | 'teacher' | 'admin' | null) {
+  if (role === 'teacher') return '/teacher/dashboard';
+  if (role === 'student') return '/student/dashboard';
+  if (role === 'admin') return '/admin/dashboard';
+  return '/auth/login';
+}
 
 export default function Navigation() {
   const { pathname, push } = useRouter();
@@ -15,18 +26,16 @@ export default function Navigation() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = isAuthenticated();
-    const userRole = getRole();
-    setAuthenticated(auth);
-    setRole(userRole);
+    setAuthenticated(isAuthenticated());
+    setRole(getRole());
     setLoading(false);
   }, [pathname]);
 
   const handleLogout = async () => {
     try {
-      await apiFetch('/auth/logout', { method: 'POST' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } catch {
-      // Ignore errors
+      // ignore failures, clear local session anyway
     }
     clearSession();
     push('/');
@@ -36,85 +45,72 @@ export default function Navigation() {
     return null;
   }
 
+  const isActive = (href: string) => pathname === href || (pathname === '/' && href.startsWith('/#'));
+
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b-2 border-navy-200 shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 py-3 flex gap-3 items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-navy-900 hover:text-navy-700 transition">
-          🎓 Assignment++
+    <nav style={{ position: 'sticky', top: 0, zIndex: 100, padding: '18px 0', background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '1440px', margin: '0 auto', padding: '0 28px', gap: '24px' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>
+          <div style={{ minWidth: '44px', minHeight: '44px', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center' }}>
+            <span style={{ color: 'white', fontSize: '18px', fontWeight: 800 }}>+</span>
+          </div>
+          <div>
+            <div style={{ fontSize: '10px', letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: '2px' }}>Assignment</div>
+            <div style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '0.16em', color: 'white' }}>PLUS PLUS</div>
+          </div>
         </Link>
-        
-        <div className="flex gap-2 items-center">
-          {/* Main Links */}
-          {links.map((link) => (
+
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flex: '1', justifyContent: 'center' }}>
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                pathname === link.href
-                  ? 'bg-navy-900 text-white'
-                  : 'text-navy-900 hover:bg-navy-100'
-              }`}
+              style={{
+                color: isActive(link.href) ? 'white' : 'rgba(255,255,255,0.68)',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                transition: 'color 0.2s ease',
+              }}
             >
               {link.label}
             </Link>
           ))}
+        </div>
 
-          {/* Auth Links or User Menu */}
-          {!authenticated ? (
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {authenticated ? (
             <>
               <Link
-                href="/auth/login"
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  pathname === '/auth/login'
-                    ? 'bg-navy-900 text-white'
-                    : 'text-navy-900 hover:bg-navy-100'
-                }`}
+                href={dashboardLinkForRole(role)}
+                style={{ color: 'white', textDecoration: 'none', fontWeight: 600, fontSize: '14px', letterSpacing: '0.06em' }}
               >
-                🔐 Log In
+                Dashboard
               </Link>
-              <Link
-                href="/auth/signup"
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  pathname === '/auth/signup'
-                    ? 'bg-navy-900 text-white'
-                    : 'text-navy-900 hover:bg-navy-100'
-                }`}
+              <button
+                onClick={handleLogout}
+                style={{ padding: '12px 20px', fontSize: '14px', fontWeight: 600, color: 'white', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '9999px', cursor: 'pointer' }}
               >
-                ✍️ Sign Up
-              </Link>
-              <Link
-                href="/student/dashboard"
-                className="rounded-lg px-4 py-2 text-sm font-medium bg-blue-100 text-blue-900 hover:bg-blue-200 transition"
-              >
-                👁️ Guest
-              </Link>
+                Logout
+              </button>
             </>
           ) : (
             <>
-              <span className="px-3 py-2 text-sm text-slate-600">
-                {role === 'teacher' ? '🏫' : role === 'admin' ? '👑' : '🎓'} {role === 'teacher' ? 'Teacher' : role === 'admin' ? 'Admin' : 'Student'}
-              </span>
-              {role === 'admin' && (
-                <Link href="/admin/dashboard" className="rounded-lg px-4 py-2 text-sm font-medium bg-purple-100 text-purple-900 hover:bg-purple-200 transition">
-                  👑 Admin Panel
-                </Link>
-              )}
-              {role === 'teacher' && (
-                <Link href="/teacher/dashboard" className="rounded-lg px-4 py-2 text-sm font-medium text-navy-900 hover:bg-navy-100 transition">
-                  🏫 Dashboard
-                </Link>
-              )}
-              {role === 'student' && (
-                <Link href="/student/dashboard" className="rounded-lg px-4 py-2 text-sm font-medium text-navy-900 hover:bg-navy-100 transition">
-                  📊 Dashboard
-                </Link>
-              )}
-              <button
-                onClick={handleLogout}
-                className="rounded-lg px-4 py-2 text-sm font-medium bg-red-100 text-red-900 hover:bg-red-200 transition"
+              <Link
+                href="/auth/signup"
+                style={{ color: 'white', textDecoration: 'none', fontWeight: 600, fontSize: '14px', letterSpacing: '0.06em' }}
               >
-                🚪 Logout
-              </button>
+                Sign Up
+              </Link>
+              <Link
+                href="/auth/login"
+                className="glass-pill"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '12px 20px', fontSize: '14px', fontWeight: 600, color: 'white', textDecoration: 'none' }}
+              >
+                Login
+              </Link>
             </>
           )}
         </div>

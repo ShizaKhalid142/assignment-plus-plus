@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-import { apiFetch, ApiError } from '../../lib/api';
+import { apiFetch } from '../../lib/api';
 import { saveSession } from '../../lib/auth';
 
 export default function LoginPage() {
@@ -18,58 +18,55 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher' | 'admin'; user_id?: number }>(
-        '/auth/login',
+        '/api/auth/login',
         {
           method: 'POST',
           body: JSON.stringify({ email, password }),
         }
       );
+
       saveSession(data.access_token, data.role, data.user_id);
       router.push(data.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Unable to login');
+      setError(err?.detail || err?.message || 'Unable to login');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="auth-page flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
-        <div className="card border-2 border-navy-200">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">🔐</div>
-            <h1 className="text-3xl font-bold text-navy-900">Welcome Back</h1>
-            <p className="text-slate-600 mt-2">Log in to your Assignment++ account</p>
+        <div className="auth-card rounded-[32px] p-10">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-white/10 bg-white/5 text-3xl text-white">+</div>
+            <h1 className="text-3xl font-semibold text-white">Welcome Back</h1>
+            <p className="mt-3 text-sm text-white/70">Log in to your Assignment++ account</p>
           </div>
 
-          <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">Email Address</label>
-              <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
-                placeholder="your@email.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <form className="space-y-5" onSubmit={onSubmit}>
+            <label className="block text-sm font-medium text-white/80">Email Address</label>
+            <input
+              className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">Password</label>
-              <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            <label className="block text-sm font-medium text-white/80">Password</label>
+            <input
+              className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+              <div className="rounded-3xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-100">
                 ❌ {error}
               </div>
             )}
@@ -77,41 +74,26 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary py-2.5 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="glass-pill w-full rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? '⏳ Logging in...' : '🚀 Log In'}
+              {loading ? 'Logging in…' : 'Log In'}
             </button>
           </form>
 
-          <div className="mt-6 space-y-3">
-            <Link href="/auth/forgot-password" className="block text-center text-sm text-navy-700 hover:text-navy-900 font-medium">
+          <div className="mt-8 flex flex-col gap-4 text-center text-sm text-white/70">
+            <Link href="/auth/forgot-password" className="hover:text-white">
               Forgot your password?
             </Link>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-navy-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">or</span>
-              </div>
-            </div>
-
-            <Link
-              href="/auth/signup"
-              className="block text-center text-sm font-medium text-navy-900 hover:text-navy-700"
-            >
-              Don't have an account? <span className="text-navy-600 font-semibold">Sign up →</span>
+            <div className="flex items-center justify-center gap-3 text-white/40">or</div>
+            <Link href="/auth/signup" className="hover:text-white">
+              Don&apos;t have an account? <span className="font-semibold text-white">Sign up →</span>
             </Link>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-xs font-semibold text-blue-900 mb-2">📝 Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-blue-800">
-              <p><strong>Teacher:</strong> teacher@assignmentpp.com / Teacher123</p>
-              <p><strong>Student:</strong> student@assignmentpp.com / Student123</p>
-            </div>
+          <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-5 text-sm text-white/70">
+            <p className="mb-2 font-semibold text-white">Demo Accounts</p>
+            <p>Teacher: teacher@assignmentpp.com / Teacher123</p>
+            <p>Student: student@assignmentpp.com / Student123</p>
           </div>
         </div>
       </div>

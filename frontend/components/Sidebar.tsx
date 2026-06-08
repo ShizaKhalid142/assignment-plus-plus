@@ -49,7 +49,7 @@ export default function Sidebar({ role }: { role: 'student' | 'teacher' | 'admin
             <Link
               key={item.href}
               href={item.href}
-              className={`block rounded-xl px-3 py-2 text-sm transition ${pathname === item.href ? 'bg-white text-navy-900 font-semibold' : 'hover:bg-white/10'}`}
+              className={`block rounded-xl px-3 py-2 text-sm transition ${pathname === item.href ? 'bg-white/10 text-white font-semibold' : 'hover:bg-white/10 text-white/80'}`}
             >
               <span className="text-lg mr-2">{item.icon}</span>
               {item.label}
@@ -59,7 +59,7 @@ export default function Sidebar({ role }: { role: 'student' | 'teacher' | 'admin
         <button
           className="mt-4 w-full rounded-xl bg-white/10 hover:bg-white/20 px-3 py-2 text-sm"
           onClick={async () => {
-            await apiFetch('/auth/logout', { method: 'POST' }).catch(() => undefined);
+            await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
             clearSession();
             push('/');
           }}

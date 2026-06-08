@@ -1,299 +1,323 @@
-import Link from 'next/link';
-import { useState } from 'react';
-
-const features = [
-  { icon: '🏗️', title: 'Assignment Builder', desc: 'Create assignments with custom rubrics and submission policies' },
-  { icon: '🤖', title: 'AI Grading', desc: 'Get AI-drafted grades reviewed and overridden by teachers' },
-  { icon: '✍️', title: 'Draft Feedback', desc: 'Students submit drafts and get AI feedback before final submission' },
-  { icon: '📊', title: 'Analytics', desc: 'Track class performance, trends, and identify struggling students' },
-  { icon: '🔍', title: 'Plagiarism Detection', desc: 'Intelligent plagiarism checking with confidence scores' },
-  { icon: '📋', title: 'Transparent Grading', desc: 'Rubric-based scoring students can understand clearly' }
-];
-
-const benefits = [
-  { icon: '⏱️', title: 'Save Time', desc: 'Teachers spend 70% less time on manual grading' },
-  { icon: '📈', title: 'Improve Learning', desc: 'Students get real-time feedback and guidance' },
-  { icon: '⚖️', title: 'Fair Grading', desc: 'Consistent rubric usage across all submissions' },
-  { icon: '🔒', title: 'Academic Integrity', desc: 'Policy-aware tools that support honest work' },
-  { icon: '📱', title: 'Access Anywhere', desc: 'Work on any device with a web browser' },
-  { icon: '🎓', title: 'Better Outcomes', desc: 'Improved student performance and engagement' }
-];
-
-const studentWorkflow = [
-  { step: 1, title: 'Dashboard', desc: 'View active assignments and upcoming deadlines' },
-  { step: 2, title: 'Browse Courses', desc: 'Enroll in courses and manage your coursework' },
-  { step: 3, title: 'Assignment Details', desc: 'Read full brief, rubric, and allowed resources' },
-  { step: 4, title: 'Submit Work', desc: 'Upload files and submit final assignments' },
-  { step: 5, title: 'Get Feedback', desc: 'Review grades, comments, and plagiarism reports' },
-  { step: 6, title: 'Track Progress', desc: 'View history and learn from past submissions' }
-];
+import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, Check, Play } from 'lucide-react'
+import BackgroundVideo from '../components/BackgroundVideo'
+import { apiFetch } from '../lib/api'
+import { saveSession } from '../lib/auth'
 
 const teacherWorkflow = [
-  { step: 1, title: 'Dashboard', desc: 'Quick stats on pending reviews and submissions' },
-  { step: 2, title: 'Manage Courses', desc: 'Create courses and register students' },
-  { step: 3, title: 'Build Assignments', desc: 'Create assignments with rubric and policies' },
-  { step: 4, title: 'Review Submissions', desc: 'Filter and search through all submissions' },
-  { step: 5, title: 'Grade with AI', desc: 'Review AI drafts and override if needed' },
-  { step: 6, title: 'Analytics', desc: 'Analyze class performance and student trends' }
-];
+  'Dashboard → Quick stats for pending reviews, submissions, and course health.',
+  'Courses → Create and manage classes, enroll students, and share materials.',
+  'Assignment Builder → Define rubrics, due dates, allowed resources, and hint policy.',
+  'Submissions → Track student uploads, draft history, and review requests.',
+  'Grading Queue → Review AI suggestions, accept drafts, and override final grades.',
+  'Analytics → Identify student gaps, class trends, and performance patterns.',
+  'Settings → Adjust grading, feedback, and security policy controls.',
+]
 
-const creators = [
-  'Shiza Khalid',
-  'Misbah Riaz',
-  'Muhammad Sulaim',
-  'Muhammad Shehroz',
-  'Abdul Mannan'
-];
+const studentWorkflow = [
+  'Dashboard → See active assignments, deadlines, and quick action cards.',
+  'Courses → Review enrolled classes and course information.',
+  'Assignment Detail → View full briefs, rubric criteria, and allowed resources.',
+  'Submit → Upload drafts, request feedback, and finalize work.',
+  'Feedback → Review rubric-based comments, grades, and integrity notes.',
+  'History → Reflect on past assignments and improvement areas.',
+]
+
+const techStack = [
+  { title: 'React + Next.js', description: 'A modern, responsive frontend for teachers and students.' },
+  { title: 'Tailwind CSS', description: 'Polished dark glass UI with clean workflow pages.' },
+  { title: 'FastAPI', description: 'Fast backend API routes for auth, assignments, and analytics.' },
+  { title: 'JWT Auth', description: 'Secure role-based sessions for teachers and students.' },
+  { title: 'HLS Video', description: 'Immersive hero media for the landing experience.' },
+  { title: 'AI & Plagiarism', description: 'Support for grading drafts and integrity-aware checks.' },
+]
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'student' | 'teacher'>('student');
+  const router = useRouter()
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [placeholder, setPlaceholder] = useState('')
+  const [index, setIndex] = useState(0)
+  const [guestLoading, setGuestLoading] = useState(false)
+
+  const messageText = useMemo(
+    () => (submitted ? 'You Will Receive Notifications By Email' : 'Enter Your Email Here For Early Access'),
+    [submitted]
+  )
+
+  useEffect(() => {
+    if (!showEmailForm) {
+      setPlaceholder('')
+      setIndex(0)
+      return
+    }
+
+    if (index >= messageText.length) return
+
+    const timer = window.setTimeout(() => {
+      setPlaceholder(messageText.slice(0, index + 1))
+      setIndex((current) => current + 1)
+    }, 55)
+
+    return () => window.clearTimeout(timer)
+  }, [messageText, showEmailForm, index])
+
+  useEffect(() => {
+    if (!submitted) return
+
+    const timer = window.setTimeout(() => {
+      setShowEmailForm(false)
+      setSubmitted(false)
+      setEmail('')
+      setPlaceholder('')
+      setIndex(0)
+    }, 4000)
+
+    return () => window.clearTimeout(timer)
+  }, [submitted])
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSubmitted(true)
+    setPlaceholder('You Will Receive Notifications By Email')
+    setIndex(0)
+  }
+
+  const handleGuestAccess = async () => {
+    setGuestLoading(true)
+    try {
+      const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher' | 'admin'; user_id?: number }>('/api/auth/guest', {
+        method: 'POST',
+      })
+      saveSession(data.access_token, data.role, data.user_id)
+      router.push(data.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard')
+    } catch (err) {
+      console.error('Guest access failed', err)
+    } finally {
+      setGuestLoading(false)
+    }
+  }
 
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <section className="card bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700 text-white border-none shadow-2xl">
-        <div className="space-y-6">
-          <div>
-            <p className="text-sm uppercase tracking-widest text-navy-100 font-semibold">🎓 Assignment++</p>
-            <h1 className="text-5xl md:text-6xl font-bold mt-3 leading-tight">
-              The Only Companion Teachers and Students Need
-            </h1>
-            <p className="mt-4 text-lg text-navy-100 max-w-3xl leading-relaxed">
-              AI-assisted assignment management platform that unifies course workflows, grading, feedback, and analytics. 
-              Designed for both teachers and students to make education more efficient and fair.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-4">
-            <Link 
-              className="rounded-xl bg-white text-navy-900 px-6 py-3 font-semibold hover:bg-navy-100 transition shadow-lg" 
-              href="/auth/login"
-            >
-              Log In
-            </Link>
-            <Link 
-              className="rounded-xl border-2 border-white text-white px-6 py-3 font-semibold hover:bg-white/10 transition" 
-              href="/auth/signup"
-            >
-              Sign Up
-            </Link>
-            <Link 
-              className="rounded-xl border-2 border-navy-200 text-navy-100 px-6 py-3 font-semibold hover:bg-white/5 transition" 
-              href="/student/dashboard"
-            >
-              👁️ Preview as Guest
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Problem Section */}
-      <section className="grid md:grid-cols-2 gap-6">
-        <div className="card border-2 border-red-200 bg-red-50">
-          <div className="text-3xl mb-3">😓 The Problem</div>
-          <h3 className="text-xl font-semibold text-navy-900 mb-4">Teachers Spend Too Much Time on Routine Tasks</h3>
-          <ul className="space-y-3 text-sm text-slate-700">
-            <li>⏱️ 40–50% of time on manual grading</li>
-            <li>📝 Creating assignments from scratch each semester</li>
-            <li>🔍 Manually checking for plagiarism</li>
-            <li>😕 Inconsistent rubric application across submissions</li>
-            <li>📊 No clear visibility into class performance</li>
-          </ul>
-        </div>
-
-        <div className="card border-2 border-orange-200 bg-orange-50">
-          <div className="text-3xl mb-3">😰 The Student Struggle</div>
-          <h3 className="text-xl font-semibold text-navy-900 mb-4">Students Need Better Guidance</h3>
-          <ul className="space-y-3 text-sm text-slate-700">
-            <li>❓ Unclear grading criteria until submission closes</li>
-            <li>⏳ Long wait for feedback after submission</li>
-            <li>😨 Fear of plagiarism accusations</li>
-            <li>📚 No real-time learning support</li>
-            <li>🤷 Passive waiting between submission and grading</li>
-          </ul>
-        </div>
-      </section>
-
-      {/* Solution Section */}
-      <section className="card bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200">
-        <div className="text-3xl mb-3">✨ The Solution</div>
-        <h2 className="text-2xl font-semibold text-navy-900 mb-6">Assignment++ Handles It All</h2>
-        
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-4 border-l-4 border-emerald-500">
-            <p className="font-semibold text-navy-900 mb-2">🏫 For Teachers</p>
-            <p className="text-sm text-slate-600">Define, grade, and analyze assignments in one platform</p>
-          </div>
-          <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
-            <p className="font-semibold text-navy-900 mb-2">🎓 For Students</p>
-            <p className="text-sm text-slate-600">Get guidance, submit work, and learn from feedback</p>
-          </div>
-          <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
-            <p className="font-semibold text-navy-900 mb-2">🤖 For Both</p>
-            <p className="text-sm text-slate-600">AI assistance that respects academic integrity</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section>
-        <h2 className="text-3xl font-bold text-navy-900 mb-8">📋 Core Features</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {features.map((feature) => (
-            <div key={feature.title} className="card hover:shadow-xl transition border-t-4 border-navy-600">
-              <div className="text-4xl mb-3">{feature.icon}</div>
-              <h3 className="font-semibold text-navy-900 mb-2">{feature.title}</h3>
-              <p className="text-sm text-slate-600">{feature.desc}</p>
+    <main className="relative min-h-screen w-screen overflow-hidden bg-black text-white selection:bg-white selection:text-black">
+      <BackgroundVideo />
+      <div className="absolute inset-0 bg-black/85" />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <section className="flex-1 px-6 py-8 lg:px-10 lg:py-12">
+          <div className="mx-auto flex h-full max-w-6xl flex-col justify-between gap-10 py-12">
+            <div className="space-y-6 text-center">
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.6 }}
+                className="text-[11px] font-medium uppercase tracking-[0.3em] text-white/70"
+              >
+                ASSIGNMENT++ | TEACHER & STUDENT WORKFLOW PLATFORM
+              </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                style={{ fontFamily: "'Instrument Serif', serif" }}
+                className="mx-auto max-w-4xl text-4xl font-medium leading-[1.05] tracking-[-0.02em] text-white md:text-[64px]"
+              >
+                Build assignments, grade smarter, and give students feedback that matters.
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
+                className="mx-auto max-w-2xl text-sm leading-7 text-white/75 md:text-base"
+              >
+                Assignment++ unifies course management, rubric-based grading, AI-assisted review, plagiarism detection, and student progress in one polished app.
+              </motion.p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Benefits Grid */}
-      <section>
-        <h2 className="text-3xl font-bold text-navy-900 mb-8">🎯 Benefits</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {benefits.map((benefit) => (
-            <div key={benefit.title} className="card bg-gradient-to-br from-navy-50 to-blue-50 hover:shadow-lg transition">
-              <div className="text-3xl mb-3">{benefit.icon}</div>
-              <h3 className="font-semibold text-navy-900 mb-2">{benefit.title}</h3>
-              <p className="text-sm text-slate-600">{benefit.desc}</p>
+            <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4">
+              <AnimatePresence mode="wait">
+                {showEmailForm ? (
+                  <motion.form
+                    key="form"
+                    onSubmit={handleSubmit}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="glass-pill flex w-full max-w-[420px] items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 shadow-[0_0_60px_rgba(255,255,255,0.05)]"
+                  >
+                    <input
+                      className="flex-1 bg-transparent text-white placeholder-white/40 outline-none"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder={placeholder || 'Enter your email to get started'}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="glass-pill inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                    >
+                      {submitted ? <Check size={18} /> : <ArrowRight size={18} />}
+                    </button>
+                  </motion.form>
+                ) : (
+                  <motion.button
+                    key="button"
+                    onClick={() => setShowEmailForm(true)}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="glass-pill inline-flex items-center rounded-full border border-white/15 bg-white/5 px-10 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  >
+                    Get early access
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <motion.a
+                href="#teacher-flow"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.4 }}
+                className="inline-flex items-center gap-2 text-sm font-medium text-white/80 transition hover:text-white"
+              >
+                <Play size={16} />
+                Explore teacher workflow
+              </motion.a>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Workflows */}
-      <section className="space-y-8">
-        <div>
-          <h2 className="text-3xl font-bold text-navy-900 mb-6">📖 How It Works</h2>
-          
-          {/* Workflow Tabs */}
-          <div className="flex gap-4 mb-8 border-b border-slate-200">
-            <button
-              onClick={() => setActiveTab('student')}
-              className={`pb-4 px-4 font-semibold transition border-b-2 ${
-                activeTab === 'student'
-                  ? 'text-navy-900 border-navy-900'
-                  : 'text-slate-500 border-transparent hover:text-slate-700'
-              }`}
-            >
-              🎓 Student Portal
-            </button>
-            <button
-              onClick={() => setActiveTab('teacher')}
-              className={`pb-4 px-4 font-semibold transition border-b-2 ${
-                activeTab === 'teacher'
-                  ? 'text-navy-900 border-navy-900'
-                  : 'text-slate-500 border-transparent hover:text-slate-700'
-              }`}
-            >
-              🏫 Teacher Portal
-            </button>
           </div>
+        </section>
+      </div>
 
-          {/* Student Workflow */}
-          {activeTab === 'student' && (
-            <div className="grid md:grid-cols-3 gap-4">
-              {studentWorkflow.map((item) => (
-                <div key={item.step} className="card border-l-4 border-blue-500 hover:shadow-lg transition">
-                  <div className="inline-block bg-blue-100 text-blue-900 rounded-full w-10 h-10 flex items-center justify-center font-bold mb-3">
-                    {item.step}
-                  </div>
-                  <h3 className="font-semibold text-navy-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-600">{item.desc}</p>
-                </div>
-              ))}
+      <section id="features" className="relative z-10 px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Features</p>
+            <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">Core teacher and student capabilities</h2>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-2xl font-semibold text-white">Teacher capabilities</h3>
+              <ul className="mt-6 space-y-4 text-sm text-white/70">
+                <li>• Create assignments with rubrics, grading standards, and allowed resources.</li>
+                <li>• Review AI grading drafts and retain full teacher override control.</li>
+                <li>• Detect plagiarism with confidence-based reporting.</li>
+                <li>• Manage courses, registration, and feedback from one portal.</li>
+              </ul>
             </div>
-          )}
-
-          {/* Teacher Workflow */}
-          {activeTab === 'teacher' && (
-            <div className="grid md:grid-cols-3 gap-4">
-              {teacherWorkflow.map((item) => (
-                <div key={item.step} className="card border-l-4 border-emerald-500 hover:shadow-lg transition">
-                  <div className="inline-block bg-emerald-100 text-emerald-900 rounded-full w-10 h-10 flex items-center justify-center font-bold mb-3">
-                    {item.step}
-                  </div>
-                  <h3 className="font-semibold text-navy-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-600">{item.desc}</p>
-                </div>
-              ))}
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-2xl font-semibold text-white">Student experience</h3>
+              <ul className="mt-6 space-y-4 text-sm text-white/70">
+                <li>• Access assignment briefs, rubric criteria, and allowed resource guidance.</li>
+                <li>• Request draft feedback before final submission.</li>
+                <li>• Review rubric-based comments, grades, and plagiarism notes.</li>
+                <li>• Track progress and performance over time.</li>
+              </ul>
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Tech Stack */}
-      <section className="card bg-slate-50">
-        <h2 className="text-2xl font-semibold text-navy-900 mb-6">⚙️ Technology Stack</h2>
-        <div className="grid md:grid-cols-4 gap-6">
-          <div>
-            <p className="font-semibold text-navy-900 mb-2">Frontend</p>
-            <ul className="text-sm space-y-1 text-slate-600">
-              <li>✓ React 18 + TypeScript</li>
-              <li>✓ Next.js</li>
-              <li>✓ Tailwind CSS</li>
-            </ul>
-          </div>
-          <div>
-            <p className="font-semibold text-navy-900 mb-2">Backend</p>
-            <ul className="text-sm space-y-1 text-slate-600">
-              <li>✓ Python 3.11</li>
-              <li>✓ FastAPI</li>
-              <li>✓ SQLAlchemy ORM</li>
-            </ul>
-          </div>
-          <div>
-            <p className="font-semibold text-navy-900 mb-2">Database</p>
-            <ul className="text-sm space-y-1 text-slate-600">
-              <li>✓ SQLite (dev)</li>
-              <li>✓ PostgreSQL (prod)</li>
-              <li>✓ ACID compliant</li>
-            </ul>
-          </div>
-          <div>
-            <p className="font-semibold text-navy-900 mb-2">AI & Security</p>
-            <ul className="text-sm space-y-1 text-slate-600">
-              <li>✓ OpenAI GPT-4</li>
-              <li>✓ JWT Auth</li>
-              <li>✓ Bcrypt hashing</li>
-            </ul>
           </div>
         </div>
       </section>
 
-      {/* Creator Credits */}
-      <section className="card border-2 border-navy-200 bg-navy-50">
-        <h3 className="text-2xl font-semibold text-navy-900 mb-4">👥 Created By</h3>
-        <div className="grid md:grid-cols-5 gap-4">
-          {creators.map((creator) => (
-            <div key={creator} className="bg-white rounded-lg p-4 text-center border border-navy-200 hover:shadow-md transition">
-              <p className="font-semibold text-navy-900">{creator}</p>
+      <section id="teacher-flow" className="relative z-10 px-6 py-20 lg:px-10 bg-slate-950/80">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Teacher Flow</p>
+            <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">Teacher workflow pages and experience</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {teacherWorkflow.map((item) => (
+              <div key={item} className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+                <p className="text-sm text-white/70">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="student-flow" className="relative z-10 px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Student Flow</p>
+            <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">Student workflow pages and experience</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {studentWorkflow.map((item) => (
+              <div key={item} className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+                <p className="text-sm text-white/70">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" className="relative z-10 px-6 py-20 lg:px-10 bg-slate-950/80">
+        <div className="mx-auto max-w-6xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Architecture</p>
+          <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">The platform architecture</h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-xl font-semibold text-white">Frontend</h3>
+              <p className="mt-4 text-sm text-white/70">Next.js provides the landing pages, auth flow, and role-specific dashboards.</p>
             </div>
-          ))}
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-xl font-semibold text-white">Backend</h3>
+              <p className="mt-4 text-sm text-white/70">FastAPI handles authentication, assignments, grading, and analytics.</p>
+            </div>
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-xl font-semibold text-white">Storage</h3>
+              <p className="mt-4 text-sm text-white/70">SQL-backed persistence and file support for submissions and history.</p>
+            </div>
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <h3 className="text-xl font-semibold text-white">AI & Integrity</h3>
+              <p className="mt-4 text-sm text-white/70">AI grading and hints are paired with teacher oversight and plagiarism checks.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="card bg-gradient-to-r from-navy-900 to-navy-800 text-white border-none shadow-xl">
-        <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Assignment Workflow?</h2>
-        <p className="text-lg text-navy-100 mb-6">Join thousands of educators using Assignment++ today.</p>
-        <div className="flex flex-wrap gap-4">
-          <Link 
-            className="rounded-xl bg-white text-navy-900 px-6 py-3 font-semibold hover:bg-navy-100 transition" 
-            href="/auth/signup"
-          >
-            Get Started
-          </Link>
-          <Link 
-            className="rounded-xl border-2 border-white text-white px-6 py-3 font-semibold hover:bg-white/10 transition" 
-            href="/auth/login"
-          >
-            Sign In
-          </Link>
+      <section id="stack" className="relative z-10 px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-6xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Tech Stack</p>
+          <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">Modern stack for a complete classroom workflow</h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {techStack.map((item) => (
+              <div key={item.title} className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+                <p className="text-lg font-semibold text-white">{item.title}</p>
+                <p className="mt-4 text-sm text-white/70">{item.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
-    </div>
-  );
+
+      <section id="cta" className="relative z-10 px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-6xl rounded-[36px] border border-white/10 bg-white/5 p-10 backdrop-blur-xl">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/50">Ready to launch</p>
+              <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">The frontend workflow now aligns with the proposal</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-white/70">Teacher and student flows are presented clearly alongside auth and role-specific workspace pages.</p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <Link href="/auth/signup" className="glass-pill inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/15">Create account</Link>
+              <Link href="/auth/login" className="inline-flex items-center justify-center rounded-full border border-white/15 px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/15">Log in</Link>
+              <button
+                type="button"
+                onClick={handleGuestAccess}
+                disabled={guestLoading}
+                className="inline-flex items-center justify-center rounded-full border border-white/15 px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {guestLoading ? 'Starting guest session…' : 'Continue as guest'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }

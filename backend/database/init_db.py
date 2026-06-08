@@ -21,6 +21,7 @@ from app.models.domain import (
     Submission,
     Teacher,
     PasswordResetToken,
+    User,
 )
 
 

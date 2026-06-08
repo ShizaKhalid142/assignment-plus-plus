@@ -3,7 +3,13 @@
  * Handles authentication tokens and error handling
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
+const DEFAULT_API_PORT = 8000;
+const browserHost = typeof window !== 'undefined' ? window.location.hostname : '127.0.0.1';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window !== 'undefined'
+    ? `${window.location.protocol}//${browserHost}:${DEFAULT_API_PORT}`
+    : `http://${browserHost}:${DEFAULT_API_PORT}`);
 
 export interface ApiError {
   detail: string;
@@ -17,6 +23,11 @@ export async function apiFetch<T = any>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  // Normalize API endpoint paths: backend routes are all mounted under /api
+  if (!path.startsWith('/api') && !path.startsWith('http')) {
+    path = path.startsWith('/') ? `/api${path}` : `/api/${path}`;
+  }
+
   // Get token from localStorage if available
   const token = typeof window !== 'undefined' 
     ? localStorage.getItem('assignmentpp_token') 
@@ -42,10 +53,10 @@ export async function apiFetch<T = any>(
   // Handle errors
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const error: ApiError = {
-      detail: body.detail || `HTTP ${response.status}: ${response.statusText}`,
-      status: response.status,
-    };
+    const message = body.detail || body.message || `HTTP ${response.status}: ${response.statusText}`;
+    const error = new Error(message) as Error & { status?: number; detail?: string };
+    error.status = response.status;
+    error.detail = body.detail;
     throw error;
   }
 

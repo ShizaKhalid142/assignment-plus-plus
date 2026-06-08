@@ -35,21 +35,21 @@ export default function NotificationBar() {
   };
 
   return (
-    <div className="bg-navy-900 text-white px-4 py-2 text-sm flex items-center justify-between relative">
-      <p className="font-medium">🔔 Notifications {unread > 0 ? `(${unread} unread)` : ''}</p>
-      <div className="relative">
-        <button onClick={() => setShowDropdown(!showDropdown)} className="hover:bg-navy-800 px-3 py-1 rounded transition">
+    <div style={{ background: 'var(--dark-blue)', color: 'white', padding: '12px 16px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+      <p style={{ fontWeight: 600 }}>🔔 Notifications {unread > 0 ? `(${unread} unread)` : ''}</p>
+      <div style={{ position: 'relative' }}>
+        <button onClick={() => setShowDropdown(!showDropdown)} style={{ background: 'transparent', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', transition: 'opacity 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')} onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}>
           View
         </button>
         {showDropdown && (
-          <div className="absolute top-full right-0 bg-white text-navy-900 rounded-lg shadow-xl border border-navy-200 w-80 max-h-96 overflow-y-auto z-50 mt-2">
+          <div style={{ position: 'absolute', top: '100%', right: 0, background: 'rgba(15, 23, 42, 0.95)', color: 'white', borderRadius: '16px', boxShadow: '0 24px 80px rgba(0, 0, 0, 0.35)', border: '1px solid rgba(255, 255, 255, 0.12)', width: '320px', maxHeight: '384px', overflowY: 'auto', zIndex: 50, marginTop: '8px' }}>
             {items.length === 0 ? (
-              <div className="p-4 text-center text-gray-600">No notifications</div>
+              <div style={{ padding: '16px', textAlign: 'center', color: 'rgba(255,255,255,0.65)' }}>No notifications</div>
             ) : (
               items.map(notif => (
-                <div key={notif.id} onClick={() => markAsRead(notif.id)} className={`p-4 border-b border-navy-100 cursor-pointer hover:bg-navy-50 transition ${!notif.is_read ? 'bg-blue-50' : ''}`}>
-                  <p className="font-semibold text-sm">{notif.title}</p>
-                  <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
+                <div key={notif.id} onClick={() => markAsRead(notif.id)} style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', background: !notif.is_read ? 'rgba(88, 204, 2, 0.08)' : 'rgba(255,255,255,0.03)', transition: 'background-color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(88, 204, 2, 0.12)')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = !notif.is_read ? 'rgba(88, 204, 2, 0.08)' : 'rgba(255,255,255,0.03)')}>
+                  <p style={{ fontWeight: 600, fontSize: '14px', color: 'white' }}>{notif.title}</p>
+                  <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>{notif.message}</p>
                 </div>
               ))
             )}

@@ -127,7 +127,7 @@ export default function TeacherAnalytics() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <p className="font-semibold text-navy-900">D/F (< 70%)</p>
+                    <p className="font-semibold text-navy-900">D/F (&lt; 70%)</p>
                     <p className="text-sm text-gray-600">15%</p>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">

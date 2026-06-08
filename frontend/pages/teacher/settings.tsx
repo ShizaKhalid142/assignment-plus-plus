@@ -35,7 +35,7 @@ export default function TeacherSettings() {
       return;
     }
     try {
-      await apiFetch('/auth/change-password', {
+      await apiFetch('/api/auth/change-password', {
         method: 'PUT',
         body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
       });
@@ -128,5 +128,4 @@ export default function TeacherSettings() {
       </div>
     </Layout>
   );
-}
 }

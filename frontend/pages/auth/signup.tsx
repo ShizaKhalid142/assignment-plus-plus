@@ -21,7 +21,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const data = await apiFetch<{ access_token: string; role: 'student' | 'teacher' | 'admin'; user_id?: number }>(
-        '/auth/register',
+        '/api/auth/register',
         {
           method: 'POST',
           body: JSON.stringify({ name, email, password, role, id_number: idNumber || null }),
@@ -30,27 +30,27 @@ export default function SignupPage() {
       saveSession(data.access_token, data.role, data.user_id);
       router.push(data.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Unable to sign up');
+      setError(err?.detail || err?.message || 'Unable to sign up');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="auth-page flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
-        <div className="card border-2 border-navy-200">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">✍️</div>
-            <h1 className="text-3xl font-bold text-navy-900">Create Account</h1>
-            <p className="text-slate-600 mt-2">Join Assignment++ today</p>
+        <div className="auth-card rounded-[32px] p-10">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-white/10 bg-white/5 text-3xl text-white">+</div>
+            <h1 className="text-3xl font-semibold text-white">Create your account</h1>
+            <p className="mt-3 text-sm text-white/70">Join Assignment++ and get your classroom moving faster.</p>
           </div>
 
-          <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <form className="space-y-5" onSubmit={onSubmit}>
             <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-white/80">Full Name</label>
               <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
+                className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -59,10 +59,10 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-white/80">Email Address</label>
               <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
-                placeholder="your@email.com"
+                className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
+                placeholder="you@example.com"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -71,9 +71,9 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">Password</label>
+              <label className="block text-sm font-medium text-white/80">Password</label>
               <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
+                className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
                 type="password"
                 placeholder="At least 6 characters"
                 value={password}
@@ -83,29 +83,29 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">ID Number (Optional)</label>
+              <label className="block text-sm font-medium text-white/80">ID Number (Optional)</label>
               <input
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
-                placeholder="e.g., S-1001 or T-9001"
+                className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white placeholder-white/40"
+                placeholder="e.g. S-1001 or T-9001"
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-navy-900 mb-2">I am a...</label>
+              <label className="block text-sm font-medium text-white/80">I am a</label>
               <select
-                className="w-full rounded-lg border-2 border-navy-200 px-4 py-2.5 text-sm focus:outline-none focus:border-navy-900 transition"
+                className="input-glass w-full rounded-full border px-5 py-3 text-sm text-white"
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'student' | 'teacher')}
               >
-                <option value="student">🎓 Student</option>
-                <option value="teacher">🏫 Teacher / Instructor</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
               </select>
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+              <div className="rounded-3xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-100">
                 ❌ {error}
               </div>
             )}
@@ -113,27 +113,16 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary py-2.5 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="glass-pill w-full rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? '⏳ Creating account...' : '🚀 Sign Up'}
+              {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-navy-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">or</span>
-              </div>
-            </div>
-
-            <Link
-              href="/auth/login"
-              className="block text-center text-sm font-medium text-navy-900 hover:text-navy-700 mt-4"
-            >
-              Already have an account? <span className="text-navy-600 font-semibold">Log in →</span>
+          <div className="mt-8 text-center text-sm text-white/70">
+            <p>Already have an account?</p>
+            <Link href="/auth/login" className="mt-3 inline-block text-white underline-offset-4 hover:underline">
+              Log in →
             </Link>
           </div>
         </div>
