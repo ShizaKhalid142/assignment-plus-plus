@@ -53,10 +53,15 @@ export async function apiFetch<T = any>(
   // Handle errors
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const message = body.detail || body.message || `HTTP ${response.status}: ${response.statusText}`;
+    // FastAPI validation errors come as detail: [{type, loc, msg, ...}]
+    let detail = body.detail;
+    if (Array.isArray(detail)) {
+      detail = detail.map((e: any) => `${e.msg || ''} (${(e.loc || []).join(' → ')})`).join('; ');
+    }
+    const message = detail || body.message || `HTTP ${response.status}: ${response.statusText}`;
     const error = new Error(message) as Error & { status?: number; detail?: string };
     error.status = response.status;
-    error.detail = body.detail;
+    error.detail = typeof detail === 'string' ? detail : String(detail || '');
     throw error;
   }
 

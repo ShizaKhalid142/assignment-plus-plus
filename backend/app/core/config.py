@@ -8,14 +8,31 @@ from functools import lru_cache
 def _get_default_cors_origins() -> str:
     """Generate default CORS origins for development"""
     hostname = socket.gethostname()
-    localhost_ip = socket.gethostbyname(hostname)
-    
-    return ",".join([
+    try:
+        localhost_ip = socket.gethostbyname(hostname)
+    except Exception:
+        localhost_ip = "127.0.0.1"
+
+    # Also grab all non-loopback IPv4 addresses
+    extra_ips = []
+    try:
+        for info in socket.getaddrinfo(hostname, None, socket.AF_INET):
+            ip = info[4][0]
+            if ip not in ("127.0.0.1", localhost_ip):
+                extra_ips.append(ip)
+    except Exception:
+        pass
+
+    origins = [
         "http://localhost:3000",
         f"http://{hostname}:3000",
         f"http://{localhost_ip}:3000",
         "http://127.0.0.1:3000",
-    ])
+    ]
+    for ip in extra_ips[:3]:  # limit extra LAN IPs
+        origins.append(f"http://{ip}:3000")
+
+    return ",".join(origins)
 
 
 class Settings:

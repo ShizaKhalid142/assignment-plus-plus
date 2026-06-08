@@ -413,36 +413,59 @@ textarea::placeholder {
   background-color: rgba(255, 150, 0, 0.15);
 }
 
-.portal-dark .bg-white {
+/* ── Portal Dark Theme Overrides ── */
+/* Every white/light widget inside .portal-dark becomes dark glass */
+
+/* ── Backgrounds: kill all light bgs ── */
+.portal-dark .bg-white,
+.portal-dark [class*="bg-white/"],
+.portal-dark .bg-navy-50,
+.portal-dark .bg-navy-100,
+.portal-dark .bg-navy-200,
+.portal-dark .bg-gray-50,
+.portal-dark .bg-green-50,
+.portal-dark .bg-red-50,
+.portal-dark .bg-blue-50,
+.portal-dark .hover\:bg-navy-50:hover,
+.portal-dark .hover\:bg-gray-50:hover {
   background-color: rgba(255, 255, 255, 0.06) !important;
-  color: white !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
-.portal-dark [class*="bg-white"] {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  color: white !important;
-}
-
-.portal-dark .bg-navy-50 {
+.portal-dark .bg-gradient-to-br.from-navy-50.to-blue-50,
+.portal-dark [class*="bg-gradient-to-br from-navy-50"] {
+  background-image: none !important;
   background-color: rgba(255, 255, 255, 0.06) !important;
 }
 
+/* ── Borders: replace light borders with subtle white ── */
 .portal-dark .border-navy-100,
 .portal-dark .border-navy-200,
+.portal-dark .border-navy-300,
 .portal-dark .border-gray-200,
 .portal-dark .border-gray-300,
 .portal-dark .border-gray-400,
-.portal-dark .border-slate-200 {
+.portal-dark .border-slate-200,
+.portal-dark [class*="border-navy-"], 
+.portal-dark .border-b-2,
+.portal-dark .border-b,
+.portal-dark .border-t,
+.portal-dark .border-l-4 {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+/* ── Text: make all dark-on-light text readable on dark bg ── */
 .portal-dark .text-navy-900,
+.portal-dark .text-navy-700,
+.portal-dark .text-navy-600,
 .portal-dark .text-gray-600,
 .portal-dark .text-gray-700,
 .portal-dark .text-gray-500,
+.portal-dark .text-gray-400,
+.portal-dark .text-gray-800,
 .portal-dark .text-slate-600,
 .portal-dark .text-slate-700,
-.portal-dark .text-slate-600 {
+.portal-dark .text-slate-500 {
   color: rgba(255, 255, 255, 0.85) !important;
 }
 
@@ -451,14 +474,116 @@ textarea::placeholder {
   color: rgba(255, 255, 255, 0.64) !important;
 }
 
-.portal-dark .hover\:shadow-md:hover,
+.portal-dark .text-xs,
+.portal-dark .text-sm,
+.portal-dark .text-base,
+.portal-dark .text-lg {
+  color: inherit;
+}
+
+/* ── Inputs/Selects/Textareas ── */
+.portal-dark input[class*="border-navy"],
+.portal-dark select[class*="border-navy"],
+.portal-dark textarea[class*="border-navy"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.portal-dark input[class*="border-navy"]:focus,
+.portal-dark select[class*="border-navy"]:focus,
+.portal-dark textarea[class*="border-navy"]:focus {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06) !important;
+}
+
+.portal-dark input[class*="border-navy"]::placeholder,
+.portal-dark textarea[class*="border-navy"]::placeholder {
+  color: rgba(255, 255, 255, 0.40) !important;
+}
+
+/* ── Shadows ── */
 .portal-dark .shadow-sm,
-.portal-dark .shadow-lg {
+.portal-dark .shadow-lg,
+.portal-dark .hover\:shadow-md:hover,
+.portal-dark .hover\:shadow-lg:hover {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35) !important;
 }
 
-.portal-dark .bg-navy-100 {
+.portal-dark .hover\:shadow-lg:hover {
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ── Tables ── */
+.portal-dark thead,
+.portal-dark tr[class*="border"],
+.portal-dark td[class*="border"] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── Placeholder text (global) ── */
+.portal-dark ::placeholder {
+  color: rgba(255, 255, 255, 0.40) !important;
+}
+
+/* ── Accent text colors preserved ── */
+.portal-dark .text-green-600,
+.portal-dark .text-green-500,
+.portal-dark .text-emerald-600,
+.portal-dark .text-emerald-500 {
+  color: rgba(74, 222, 128, 0.85) !important;
+}
+
+.portal-dark .text-red-600,
+.portal-dark .text-red-500 {
+  color: rgba(248, 113, 113, 0.85) !important;
+}
+.portal-dark .text-slate-600,
+.portal-dark .text-slate-700 {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.portal-dark .text-xs.text-gray-600,
+.portal-dark .text-xs.text-gray-700 {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+/* Shadows */
+.portal-dark .shadow-sm,
+.portal-dark .shadow-md,
+.portal-dark .shadow-lg,
+.portal-dark .hover\:shadow-md:hover,
+.portal-dark .hover\:shadow-lg:hover {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Form inputs & selects */
+.portal-dark select,
+.portal-dark input[type="text"],
+.portal-dark input[type="number"],
+.portal-dark input[type="date"],
+.portal-dark input[type="email"],
+.portal-dark input[type="password"],
+.portal-dark textarea {
   background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+.portal-dark select:focus,
+.portal-dark input:focus,
+.portal-dark textarea:focus {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05) !important;
+}
+
+.portal-dark select option {
+  background-color: #1a1a2e;
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.portal-dark ::placeholder {
+  color: rgba(255, 255, 255, 0.40) !important;
 }
 
 /* Badges */
