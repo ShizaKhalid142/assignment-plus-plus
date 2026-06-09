@@ -28,7 +28,11 @@ export default function SignupPage() {
         }
       );
       saveSession(data.access_token, data.role, data.user_id);
-      router.push(data.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
+      router.push(
+        data.role === 'admin' ? '/admin/dashboard' :
+        data.role === 'teacher' ? '/teacher/dashboard' :
+        '/student/dashboard'
+      );
     } catch (err: any) {
       setError(err?.detail || err?.message || 'Unable to sign up');
     } finally {

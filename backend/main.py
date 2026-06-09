@@ -13,7 +13,7 @@ from pathlib import Path
 
 load_dotenv(Path(__file__).parent / ".env")
 
-from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions, admin
+from app.api.routes import ai, assignments, auth, courses, dashboard, export_routes, feedback, files, grades, hints, notifications, peer_reviews, plagiarism, policies, rubrics, submissions, websocket_routes, admin
 from app.core.config import get_settings
 from database.init_db import init_db
 
@@ -63,6 +63,12 @@ app.include_router(ai.router, prefix="/api")
 app.include_router(plagiarism.router, prefix="/api")
 app.include_router(hints.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(policies.router, prefix="/api")
+app.include_router(export_routes.router, prefix="/api")
+app.include_router(peer_reviews.router, prefix="/api")
+app.include_router(files.router, prefix="/api")
+app.include_router(websocket_routes.router, prefix="/api")
+app.include_router(rubrics.router, prefix="/api")
 
 
 if __name__ == "__main__":

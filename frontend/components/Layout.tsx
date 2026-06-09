@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <LayoutContext.Provider value={true}>
-      <div style={{ minHeight: '100vh', backgroundColor: isBrandPage ? '#000000' : '#ffffff' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#000000', color: '#ffffff' }}>
         <Navigation />
         <main style={{ maxWidth: '1440px', margin: '0 auto', padding: isBrandPage ? '0' : '40px' }}>{children}</main>
       </div>

@@ -148,12 +148,18 @@ All services tolerate missing API keys and degrade gracefully.
 
 ## Demo Accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@assignmentpp.com | Admin123 |
-| Teacher | teacher@assignmentpp.com | Teacher123 |
-| Student | student@assignmentpp.com | Student123 |
-| Guest | N/A (use Guest button) | None |
+| Role | Name | Email | Password |
+|------|------|-------|----------|
+| Admin | Admin | admin@assignmentpp.com | Admin123 |
+| Teacher | Prof. Ada | teacher@assignmentpp.com | Teacher123 |
+| Teacher | Miss Yusra | yusra@assignmentpp.com | Yusra123 |
+| Teacher | Dr. Sajjad | sajjad@assignmentpp.com | Sajjad123 |
+| Student | Ali Student | student@assignmentpp.com | Student123 |
+| Student | Shiza Khalid | bsai25108142@szabist.pk | Shiza123 |
+| Student | Misbah Riaz | bsai25108117@szabist.pk | Misbah123 |
+| Student | Muhammad Sulaim | bsai25108126@szabist.pk | Sulaim123 |
+| Student | Muhammad Shehroz | bsai25108125@szabist.pk | Shehroz123 |
+| Guest | N/A (use Guest button) | None | |
 
 ---
 

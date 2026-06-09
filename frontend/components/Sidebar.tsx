@@ -12,6 +12,7 @@ const studentItems: NavItem[] = [
   { href: '/student/assignments', label: 'Assignments', icon: '📝' },
   { href: '/student/assignment-detail', label: 'Assignment Detail', icon: '📋' },
   { href: '/student/submit', label: 'Submit', icon: '📤' },
+  { href: '/student/peer-review', label: 'Peer Review', icon: '👥' },
   { href: '/student/feedback', label: 'Feedback', icon: '✅' },
   { href: '/student/history', label: 'History', icon: '🕘' },
   { href: '/student/settings', label: 'Settings', icon: '⚙️' }
@@ -21,18 +22,17 @@ const teacherItems: NavItem[] = [
   { href: '/teacher/dashboard', label: 'Dashboard', icon: '📈' },
   { href: '/teacher/courses', label: 'Courses', icon: '🏫' },
   { href: '/teacher/assignment-builder', label: 'Assignment Builder', icon: '🧱' },
+  { href: '/teacher/rubric-designer', label: 'Rubric Designer', icon: '🎯' },
   { href: '/teacher/submissions', label: 'Submissions', icon: '📂' },
   { href: '/teacher/grading-queue', label: 'Grading Queue', icon: '🧠' },
   { href: '/teacher/analytics', label: 'Analytics', icon: '📉' },
   { href: '/teacher/student-register', label: 'Student Register', icon: '🪪' },
+  { href: '/teacher/export', label: 'Export Reports', icon: '📦' },
   { href: '/teacher/settings', label: 'Settings', icon: '⚙️' }
 ];
 
 const adminItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: '👑' },
-  { href: '/admin/dashboard', label: 'Platform Stats', icon: '📊' },
-  { href: '/admin/dashboard', label: 'Users', icon: '👥' },
-  { href: '/admin/dashboard', label: 'Courses', icon: '📚' },
 ];
 
 export default function Sidebar({ role }: { role: 'student' | 'teacher' | 'admin' | null }) {

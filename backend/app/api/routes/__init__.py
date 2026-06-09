@@ -1,4 +1,4 @@
-from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, submissions, admin
+from app.api.routes import ai, assignments, auth, courses, dashboard, feedback, grades, hints, notifications, plagiarism, policies, submissions, admin
 
 __all__ = [
     "auth",
@@ -12,4 +12,5 @@ __all__ = [
     "dashboard",
     "hints",
     "plagiarism",
+    "policies",
 ]

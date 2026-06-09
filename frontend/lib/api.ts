@@ -333,10 +333,116 @@ export const aiApi = {
  */
 export const dashboardApi = {
   getTeacherStats: () =>
-    apiFetch('/api/dashboard/teacher/stats'),
+    apiFetch('/api/dashboard/teacher'),
 
   getStudentStats: () =>
-    apiFetch('/api/dashboard/student/stats'),
+    apiFetch('/api/dashboard/student'),
+};
+
+/**
+ * Policies API calls
+ */
+export const policiesApi = {
+  // Submission policies
+  getSubmissionPolicy: (assignmentId: number) =>
+    apiFetch(`/api/policies/submission/${assignmentId}`),
+
+  createSubmissionPolicy: (data: {
+    assignment_id: number;
+    allowed_resources?: string;
+    hint_only_mode?: boolean;
+    citation_required?: boolean;
+  }) =>
+    apiFetch('/api/policies/submission', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateSubmissionPolicy: (assignmentId: number, data: {
+    allowed_resources?: string;
+    hint_only_mode?: boolean;
+    citation_required?: boolean;
+  }) =>
+    apiFetch(`/api/policies/submission/${assignmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  checkPolicyCompliance: (assignmentId: number) =>
+    apiFetch(`/api/policies/submission/${assignmentId}/check`),
+
+  // Grading policies / Feedback templates
+  listGradingPolicies: () =>
+    apiFetch('/api/policies/grading'),
+
+  getGradingPolicy: (policyId: number) =>
+    apiFetch(`/api/policies/grading/${policyId}`),
+
+  createGradingPolicy: (data: {
+    name: string;
+    feedback_template: string;
+    late_penalty_percent?: number;
+  }) =>
+    apiFetch('/api/policies/grading', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateGradingPolicy: (policyId: number, data: {
+    name?: string;
+    feedback_template?: string;
+    late_penalty_percent?: number;
+  }) =>
+    apiFetch(`/api/policies/grading/${policyId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteGradingPolicy: (policyId: number) =>
+    apiFetch(`/api/policies/grading/${policyId}`, { method: 'DELETE' }),
+
+  applyTemplate: (gradingPolicyId: number, submissionId: number) =>
+    apiFetch('/api/policies/grading/apply-template', {
+      method: 'POST',
+      body: JSON.stringify({
+        grading_policy_id: gradingPolicyId,
+        submission_id: submissionId,
+      }),
+    }),
+};
+
+/**
+ * Export API calls
+ */
+export const exportApi = {
+  exportCourse: (courseId: number, format: 'csv' | 'excel' | 'json' = 'csv') =>
+    apiFetch('/api/export', {
+      method: 'POST',
+      body: JSON.stringify({ course_id: courseId, format }),
+    }),
+
+  exportSubmissions: (assignmentId: number, format: 'csv' | 'excel' | 'json' = 'csv') =>
+    apiFetch(`/api/export/submissions/${assignmentId}`, {
+      method: 'POST',
+      body: JSON.stringify({ format }),
+    }),
+};
+
+/**
+ * Peer Review API calls
+ */
+export const peerReviewApi = {
+  create: (data: { submission_id: number; reviewer_id: number; score: number; comments: string }) =>
+    apiFetch('/api/peer-reviews', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  list: (submissionId: number) =>
+    apiFetch(`/api/peer-reviews/${submissionId}`),
+
+  getStats: (submissionId: number) =>
+    apiFetch(`/api/peer-reviews/${submissionId}/stats`),
 };
 
 export default apiFetch;

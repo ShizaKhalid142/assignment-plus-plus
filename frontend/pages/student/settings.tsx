@@ -71,16 +71,16 @@ export default function StudentSettings() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-navy-900 mb-6">⚙️ Settings</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">⚙️ Settings</h1>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-navy-200">
+        <div className="flex gap-4 mb-6 border-b border-white/10">
           <button
             onClick={() => { setTab('profile'); setMessage(''); setError(''); }}
             className={`pb-3 px-4 font-semibold transition ${
               tab === 'profile'
-                ? 'text-navy-700 border-b-2 border-navy-700'
-                : 'text-gray-500 hover:text-navy-600'
+                ? 'text-white border-b-2 border-blue-400'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
             👤 Profile
@@ -89,8 +89,8 @@ export default function StudentSettings() {
             onClick={() => { setTab('password'); setMessage(''); setError(''); }}
             className={`pb-3 px-4 font-semibold transition ${
               tab === 'password'
-                ? 'text-navy-700 border-b-2 border-navy-700'
-                : 'text-gray-500 hover:text-navy-600'
+                ? 'text-white border-b-2 border-blue-400'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
             🔐 Password
@@ -98,32 +98,32 @@ export default function StudentSettings() {
         </div>
 
         {/* Messages */}
-        {message && <div className="mb-4 p-4 bg-green-100 border border-green-300 rounded-lg text-green-700">{message}</div>}
-        {error && <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700">❌ {error}</div>}
+        {message && <div className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-green-300">{message}</div>}
+        {error && <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300">❌ {error}</div>}
 
         {/* Profile Tab */}
         {tab === 'profile' && (
-          <div className="bg-white rounded-2xl border border-navy-100 p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-navy-900 mb-4">Update Profile</h2>
+          <div className="bg-white/5 rounded-2xl border border-white/10 p-6 backdrop-blur-sm">
+            <h2 className="text-xl font-bold text-white mb-4">Update Profile</h2>
             <div className="space-y-4">
               <input
                 type="text"
                 placeholder="Full Name"
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                className="w-full px-4 py-2 border-2 border-navy-300 rounded-lg focus:border-navy-700 outline-none"
+                className="w-full px-4 py-2 bg-white/8 border border-white/15 rounded-lg text-white placeholder:text-white/30 focus:border-white/30 outline-none"
               />
               <input
                 type="email"
                 placeholder="Email"
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                className="w-full px-4 py-2 border-2 border-navy-300 rounded-lg focus:border-navy-700 outline-none"
+                className="w-full px-4 py-2 bg-white/8 border border-white/15 rounded-lg text-white placeholder:text-white/30 focus:border-white/30 outline-none"
               />
               <button
                 onClick={handleProfileUpdate}
                 disabled={loading}
-                className="w-full bg-navy-700 text-white py-2 rounded-lg font-semibold hover:bg-navy-800 transition disabled:opacity-50"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
               >
                 {loading ? '⏳ Updating...' : '✓ Update Profile'}
               </button>
@@ -133,31 +133,31 @@ export default function StudentSettings() {
 
         {/* Password Tab */}
         {tab === 'password' && (
-          <div className="bg-white rounded-2xl border border-navy-100 p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-navy-900 mb-4">Change Password</h2>
+          <div className="bg-white/5 rounded-2xl border border-white/10 p-6 backdrop-blur-sm">
+            <h2 className="text-xl font-bold text-white mb-4">Change Password</h2>
             <div className="space-y-4">
               <input
                 type="password"
                 placeholder="Current Password"
                 value={password.old}
                 onChange={(e) => setPassword({ ...password, old: e.target.value })}
-                className="w-full px-4 py-2 border-2 border-navy-300 rounded-lg focus:border-navy-700 outline-none"
+                className="w-full px-4 py-2 bg-white/8 border border-white/15 rounded-lg text-white placeholder:text-white/30 focus:border-white/30 outline-none"
               />
               <input
                 type="password"
                 placeholder="New Password"
                 value={password.new}
                 onChange={(e) => setPassword({ ...password, new: e.target.value })}
-                className="w-full px-4 py-2 border-2 border-navy-300 rounded-lg focus:border-navy-700 outline-none"
+                className="w-full px-4 py-2 bg-white/8 border border-white/15 rounded-lg text-white placeholder:text-white/30 focus:border-white/30 outline-none"
               />
               <input
                 type="password"
                 placeholder="Confirm Password"
                 value={password.confirm}
                 onChange={(e) => setPassword({ ...password, confirm: e.target.value })}
-                className="w-full px-4 py-2 border-2 border-navy-300 rounded-lg focus:border-navy-700 outline-none"
+                className="w-full px-4 py-2 bg-white/8 border border-white/15 rounded-lg text-white placeholder:text-white/30 focus:border-white/30 outline-none"
               />
-              <p className="text-sm text-gray-600">Password must have: 8+ chars, uppercase, lowercase, digit</p>
+              <p className="text-sm text-white/50">Password must have: 8+ chars, uppercase, lowercase, digit</p>
               <button
                 onClick={handlePasswordChange}
                 disabled={loading}

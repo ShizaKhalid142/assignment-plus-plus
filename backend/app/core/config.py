@@ -48,6 +48,8 @@ class Settings:
     jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "")
     jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
     jwt_access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    use_postgres: bool = os.getenv("USE_POSTGRES", "").lower() in ("true", "1", "yes")
 
 
 @lru_cache(maxsize=1)

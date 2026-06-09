@@ -18,11 +18,13 @@ export default function AdminDashboard() {
 
   const loadStats = async () => {
     try {
-      // Get counts from API
-      const teachers = await apiFetch('/users?role=teacher');
-      const students = await apiFetch('/users?role=student');
-      const courses = await apiFetch('/courses');
-      const submissions = await apiFetch('/submissions');
+      // Get counts from admin API
+      const [teachers, students, courses, submissions] = await Promise.all([
+        apiFetch('/api/admin/users?role=teacher').catch(() => []),
+        apiFetch('/api/admin/users?role=student').catch(() => []),
+        apiFetch('/courses').catch(() => []),
+        apiFetch('/submissions').catch(() => []),
+      ]);
       
       setStats({
         teachers: teachers?.length || 0,
@@ -44,53 +46,53 @@ export default function AdminDashboard() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-4xl font-bold text-navy-900 mb-8">👑 Admin Dashboard</h1>
+        <h1 className="text-4xl font-bold text-white mb-8">👑 Admin Dashboard</h1>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
-            <p className="text-sm opacity-90">Teachers</p>
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl p-6 shadow-lg">
+            <p className="text-sm opacity-80">Teachers</p>
             <p className="text-3xl font-bold">{stats.teachers}</p>
           </div>
-          <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-2xl p-6 shadow-lg">
-            <p className="text-sm opacity-90">Students</p>
+          <div className="bg-gradient-to-br from-green-500 to-green-700 text-white rounded-2xl p-6 shadow-lg">
+            <p className="text-sm opacity-80">Students</p>
             <p className="text-3xl font-bold">{stats.students}</p>
           </div>
-          <div className="bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-2xl p-6 shadow-lg">
-            <p className="text-sm opacity-90">Courses</p>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-2xl p-6 shadow-lg">
+            <p className="text-sm opacity-80">Courses</p>
             <p className="text-3xl font-bold">{stats.courses}</p>
           </div>
-          <div className="bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-2xl p-6 shadow-lg">
-            <p className="text-sm opacity-90">Submissions</p>
+          <div className="bg-gradient-to-br from-orange-500 to-orange-700 text-white rounded-2xl p-6 shadow-lg">
+            <p className="text-sm opacity-80">Submissions</p>
             <p className="text-3xl font-bold">{stats.submissions}</p>
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="bg-white rounded-2xl border border-navy-100 p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-navy-900 mb-4">📋 Registered Students</h2>
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 backdrop-blur-sm">
+          <h2 className="text-xl font-bold text-white mb-4">📋 Registered Students</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b-2 border-navy-200">
+              <thead className="border-b border-white/10">
                 <tr>
-                  <th className="text-left py-2 px-4">Name</th>
-                  <th className="text-left py-2 px-4">Email</th>
-                  <th className="text-left py-2 px-4">ID#</th>
-                  <th className="text-left py-2 px-4">Joined</th>
+                  <th className="text-left py-3 px-4 text-white/70 font-medium">Name</th>
+                  <th className="text-left py-3 px-4 text-white/70 font-medium">Email</th>
+                  <th className="text-left py-3 px-4 text-white/70 font-medium">ID#</th>
+                  <th className="text-left py-3 px-4 text-white/70 font-medium">Joined</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user: any) => (
-                  <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-2 px-4">{user.name}</td>
-                    <td className="py-2 px-4">{user.email}</td>
-                    <td className="py-2 px-4">{user.id_number || '-'}</td>
-                    <td className="py-2 px-4 text-xs text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
+                  <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition">
+                    <td className="py-3 px-4 text-white/85">{user.name}</td>
+                    <td className="py-3 px-4 text-white/70">{user.email}</td>
+                    <td className="py-3 px-4 text-white/70">{user.id_number || '-'}</td>
+                    <td className="py-3 px-4 text-xs text-white/50">{new Date(user.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {users.length === 0 && <p className="text-center py-4 text-gray-600">No students yet</p>}
+            {users.length === 0 && <p className="text-center py-6 text-white/50">No students yet</p>}
           </div>
         </div>
       </div>

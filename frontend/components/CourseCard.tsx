@@ -7,12 +7,12 @@ export default function CourseCard({ course, action }: { course: Course; action?
     <div className="card">
       <div className="flex justify-between items-start gap-3">
         <div>
-          <h3 className="font-semibold text-lg text-navy-900">{course.name}</h3>
-          <p className="text-sm text-slate-600">{course.code}</p>
+          <h3 className="font-semibold text-lg text-white/90">{course.name}</h3>
+          <p className="text-sm text-white/60">{course.code}</p>
         </div>
         <span className="text-3xl">📘</span>
       </div>
-      <p className="mt-2 text-sm text-slate-700">{course.description || 'No description provided.'}</p>
+      <p className="mt-2 text-sm text-white/70">{course.description || 'No description provided.'}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

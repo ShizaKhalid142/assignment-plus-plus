@@ -161,6 +161,85 @@ class AIFeedbackRequest(BaseModel):
     content: str
 
 
+class SelfCheckRequest(BaseModel):
+    content: str
+    assignment_id: int
+
+
+# ── Submission Policy Schemas ──
+
+class SubmissionPolicyCreate(BaseModel):
+    assignment_id: int
+    allowed_resources: str = "Course notes"
+    hint_only_mode: bool = True
+    citation_required: bool = True
+
+
+class SubmissionPolicyUpdate(BaseModel):
+    allowed_resources: str | None = None
+    hint_only_mode: bool | None = None
+    citation_required: bool | None = None
+
+
+class SubmissionPolicyOut(BaseModel):
+    id: int
+    assignment_id: int
+    allowed_resources: str
+    hint_only_mode: bool
+    citation_required: bool
+
+
+# ── Grading Policy / Feedback Template Schemas ──
+
+class GradingPolicyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=255)
+    feedback_template: str = ""
+    late_penalty_percent: int = 0
+
+
+class GradingPolicyUpdate(BaseModel):
+    name: str | None = None
+    feedback_template: str | None = None
+    late_penalty_percent: int | None = None
+
+
+class GradingPolicyOut(BaseModel):
+    id: int
+    name: str
+    feedback_template: str
+    late_penalty_percent: int
+
+
+class ApplyTemplateRequest(BaseModel):
+    grading_policy_id: int
+    submission_id: int
+
+
+# ── Peer Review Schemas ──
+
+class PeerReviewCreate(BaseModel):
+    submission_id: int
+    reviewer_id: int
+    score: float
+    comments: str = ""
+
+
+class PeerReviewOut(BaseModel):
+    id: int
+    submission_id: int
+    reviewer_id: int
+    score: float
+    comments: str
+    created_at: datetime
+
+
+# ── Bulk Export Schemas ──
+
+class ExportRequest(BaseModel):
+    course_id: int
+    format: str = "csv"  # csv, excel, or json
+
+
 class SubmissionOut(BaseModel):
     id: int
     assignment_id: int

@@ -100,7 +100,7 @@ class Rubric(Base):
     __tablename__ = "rubrics"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id"), nullable=False, unique=True)
+    assignment_id: Mapped[int | None] = mapped_column(ForeignKey("assignments.id"), nullable=True, unique=False)
     title: Mapped[str] = mapped_column(String(255), default="Default Rubric", nullable=False)
 
     assignment: Mapped[Assignment] = relationship(back_populates="rubric")
@@ -212,3 +212,17 @@ class PasswordResetToken(Base):
     token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class PeerReview(Base):
+    __tablename__ = "peer_reviews"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    submission_id: Mapped[int] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    reviewer_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False)
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    comments: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    submission: Mapped[Submission] = relationship()
+    reviewer: Mapped[Student] = relationship()
